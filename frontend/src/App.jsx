@@ -1,230 +1,354 @@
 import React, { useState } from 'react';
-import Header from './components/Header';
-import JudgeDemoBanner from './components/JudgeDemoBanner';
-import DashboardView from './components/DashboardView';
-import TransmissionEngineView from './components/TransmissionEngineView';
-import MatchmakerView from './components/MatchmakerView';
+import Sidebar from './components/Sidebar';
+import AppHeader from './components/AppHeader';
+import LandingPageView from './components/LandingPageView';
+import LoginPageView from './components/LoginPageView';
+import AuthModal from './components/AuthModal';
+import RoleSelectionModal from './components/RoleSelectionModal';
+import HeritageDashboardView from './components/HeritageDashboardView';
+import HeritageMapView from './components/HeritageMapView';
+import TraditionsExplorerView from './components/TraditionsExplorerView';
+import TraditionDetailView from './components/TraditionDetailView';
+import AddTraditionView from './components/AddTraditionView';
+import PractitionerDashboardView from './components/PractitionerDashboardView';
+import LearnerDashboardView from './components/LearnerDashboardView';
+import MasterMatchingView from './components/MasterMatchingView';
+import AiAnalysisView from './components/AiAnalysisView';
 import KnowledgeVaultView from './components/KnowledgeVaultView';
 import ValidationQueueView from './components/ValidationQueueView';
 import RecommendationEngineView from './components/RecommendationEngineView';
-import TraditionModal from './components/TraditionModal';
+import SettingsProfileView from './components/SettingsProfileView';
 
-import { PILOT_TRADITIONS, MASTER_PRACTITIONERS, LEARNER_PROFILES, VALIDATION_QUEUE, ARCHIVED_KNOWLEDGE_ITEMS } from './data/heritageData';
-import { Layers, Activity, Users, Mic, ShieldCheck, Lightbulb } from 'lucide-react';
+import { 
+  PILOT_TRADITIONS, 
+  MASTER_PRACTITIONERS, 
+  LEARNER_PROFILES, 
+  VALIDATION_QUEUE, 
+  ARCHIVED_KNOWLEDGE_ITEMS 
+} from './data/heritageData';
 
 export default function App() {
-  const [currentRole, setCurrentRole] = useState('AUTHORITY');
-  const [activeTab, setActiveTab] = useState('DASHBOARD');
-  const [traditions, setTraditions] = useState(PILOT_TRADITIONS);
-  const [masters, setMasters] = useState(MASTER_PRACTITIONERS);
-  const [learners, setLearners] = useState(LEARNER_PROFILES);
-  const [queue, setQueue] = useState(VALIDATION_QUEUE);
-  const [archivedItems, setArchivedItems] = useState(ARCHIVED_KNOWLEDGE_ITEMS);
-  const [selectedTradition, setSelectedTradition] = useState(null);
-  const [demoStep, setDemoStep] = useState(0);
+  // Session persistence: Don't automatically log out unless user explicitly logs out
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem('sanskriti_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
 
-  const tabs = [
-    { id: 'DASHBOARD', label: 'Heritage Intelligence', icon: Layers },
-    { id: 'HTHS', label: 'HTHS Health Engine', icon: Activity },
-    { id: 'MATCHMAKER', label: 'Master–Learner Match', icon: Users },
-    { id: 'VAULT', label: 'Knowledge Vault', icon: Mic },
-    { id: 'VALIDATION', label: 'Community Validation', icon: ShieldCheck },
-    { id: 'RECOMMENDATIONS', label: 'Interventions', icon: Lightbulb }
-  ];
+  const [currentRole, setCurrentRole] = useState(() => {
+    try {
+      const savedRole = localStorage.getItem('sanskriti_role');
+      return savedRole || 'AUTHORITY';
+    } catch {
+      return 'AUTHORITY';
+    }
+  });
 
-  const handleUpdateTraditionScore = (id, newScore, newIndicators, newStatus) => {
-    setTraditions(prev => prev.map(t => {
-      if (t.id === id) {
-        let statusLabel = "Critical Transmission Gap";
-        let color = "#dc2626";
-        let bgClass = "bg-red-50 text-red-700 border-red-200";
-
-        if (newStatus === 'STRONG') {
-          statusLabel = "Strong Transmission";
-          color = "#16a34a";
-          bgClass = "bg-emerald-50 text-emerald-800 border-emerald-200";
-        } else if (newStatus === 'MONITORING') {
-          statusLabel = "Needs Monitoring";
-          color = "#d97706";
-          bgClass = "bg-amber-50 text-amber-800 border-amber-200";
-        } else if (newStatus === 'VULNERABLE') {
-          statusLabel = "Vulnerable Transmission";
-          color = "#ea580c";
-          bgClass = "bg-orange-50 text-orange-700 border-orange-200";
-        }
-
-        return {
-          ...t,
-          score: newScore,
-          indicators: newIndicators,
-          status: newStatus,
-          statusLabel,
-          color,
-          bgClass
-        };
+  const [activeView, setActiveView] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem('sanskriti_user');
+      const savedRole = localStorage.getItem('sanskriti_role');
+      const savedView = localStorage.getItem('sanskriti_view');
+      if (savedUser) {
+        if (savedView && savedView !== 'LANDING' && savedView !== 'LOGIN') return savedView;
+        if (savedRole === 'LEARNER') return 'LEARNER_DASHBOARD';
+        if (savedRole === 'PRACTITIONER') return 'PRACTITIONER_DASHBOARD';
+        return 'DASHBOARD';
       }
-      return t;
-    }));
+      return 'LANDING';
+    } catch {
+      return 'LANDING';
+    }
+  });
+
+  const [traditions, setTraditions] = useState(PILOT_TRADITIONS);
+  const [selectedTradition, setSelectedTradition] = useState(PILOT_TRADITIONS[0]);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
+  const [queue, setQueue] = useState(VALIDATION_QUEUE || []);
+  const [archivedItems, setArchivedItems] = useState(ARCHIVED_KNOWLEDGE_ITEMS || []);
+
+  // Handlers
+  const handleSelectTradition = (tradition) => {
+    setSelectedTradition(tradition);
+    handleNavigateView('TRADITION_DETAIL');
   };
 
-  const handleExecuteDemoStep = (stepNum) => {
-    setDemoStep(stepNum);
-    if (stepNum === 1) {
-      setActiveTab('HTHS');
-      setCurrentRole('PRACTITIONER');
-    } else if (stepNum === 2) {
-      setActiveTab('VALIDATION');
-      setCurrentRole('REVIEWER');
-    } else if (stepNum === 3 || stepNum === 4) {
-      setActiveTab('HTHS');
-      setCurrentRole('AUTHORITY');
-    } else if (stepNum === 5) {
-      setActiveTab('RECOMMENDATIONS');
-      setCurrentRole('AUTHORITY');
-    } else if (stepNum === 6 || stepNum === 7) {
-      setActiveTab('MATCHMAKER');
-      setCurrentRole('LEARNER');
-    } else if (stepNum === 8) {
-      setActiveTab('VAULT');
-      setCurrentRole('PRACTITIONER');
+  const handleSaveNewTradition = (newTradition) => {
+    setTraditions([newTradition, ...traditions]);
+    setSelectedTradition(newTradition);
+  };
+
+  const handleNavigateView = (view) => {
+    setActiveView(view);
+    if (currentUser && view !== 'LANDING' && view !== 'LOGIN') {
+      try {
+        localStorage.setItem('sanskriti_view', view);
+      } catch {}
     }
   };
 
-  const handleStartDemoTour = () => {
-    handleExecuteDemoStep(1);
+  const handleRoleSelection = (roleId, targetView) => {
+    setCurrentRole(roleId);
+    setIsRoleModalOpen(false);
+    if (targetView) {
+      handleNavigateView(targetView);
+    }
   };
 
-  const handleResetDemo = () => {
-    setDemoStep(0);
-    setActiveTab('DASHBOARD');
+  const handleSuccessfulAuth = (roleId, targetView) => {
+    setIsAuthModalOpen(false);
+    if (roleId) {
+      setCurrentRole(roleId);
+      if (targetView) {
+        handleNavigateView(targetView);
+        return;
+      }
+    }
+    setIsRoleModalOpen(true);
   };
 
+  const handleLogout = () => {
+    // Clear persisted session so user can log in again later
+    try {
+      localStorage.removeItem('sanskriti_user');
+      localStorage.removeItem('sanskriti_role');
+      localStorage.removeItem('sanskriti_view');
+    } catch (err) {
+      console.error('Failed to clear session:', err);
+    }
+    setCurrentUser(null);
+    setActiveView('LANDING'); // Show landing page first after logout
+  };
+
+  const handleLoginSuccess = (roleKey, targetView, userData) => {
+    const userObj = userData || { 
+      name: roleKey === 'LEARNER' ? 'Aniket Deshmukh' : (roleKey === 'PRACTITIONER' ? 'Shahir Tukaram Jagtap' : 'Ministry Heritage Authority'), 
+      role: roleKey,
+      email: roleKey === 'LEARNER' ? 'shishya.aniket@gmail.com' : (roleKey === 'PRACTITIONER' ? 'guru.tukaram@gmail.com' : 'admin.sanskriti@gov.in')
+    };
+
+    const destView = targetView || (roleKey === 'LEARNER' ? 'LEARNER_DASHBOARD' : (roleKey === 'PRACTITIONER' ? 'PRACTITIONER_DASHBOARD' : 'DASHBOARD'));
+
+    setCurrentRole(roleKey);
+    setCurrentUser(userObj);
+    setActiveView(destView);
+
+    // Save session in localStorage so user doesn't get automatically logged out
+    try {
+      localStorage.setItem('sanskriti_user', JSON.stringify(userObj));
+      localStorage.setItem('sanskriti_role', roleKey);
+      localStorage.setItem('sanskriti_view', destView);
+    } catch (err) {
+      console.error('Failed to save session:', err);
+    }
+  };
+
+  // Screen 1: Landing Page
+  if (activeView === 'LANDING') {
+    return (
+      <div className="relative min-h-screen bg-[#0d0d0d] font-sans">
+        <LandingPageView
+          onExploreHeritage={() => setActiveView('LOGIN')}
+          onOpenDashboard={() => setActiveView('LOGIN')}
+          onOpenPractitioners={() => setActiveView('LOGIN')}
+          onOpenLearn={() => setActiveView('LOGIN')}
+          onOpenAiAnalysis={() => setActiveView('LOGIN')}
+          onOpenDocumentation={() => setActiveView('LOGIN')}
+          onOpenLogin={() => setActiveView('LOGIN')}
+          onJoinMission={() => setActiveView('LOGIN')}
+        />
+
+        {/* Global Modals on Landing Page */}
+        <AuthModal
+          isOpen={isAuthModalOpen}
+          onClose={() => setIsAuthModalOpen(false)}
+          onSuccessfulAuth={handleSuccessfulAuth}
+        />
+
+        <RoleSelectionModal
+          isOpen={isRoleModalOpen}
+          onClose={() => setIsRoleModalOpen(false)}
+          onSelectRole={handleRoleSelection}
+        />
+      </div>
+    );
+  }
+
+  // Screen 2: Dedicated 3-Role Login Page (1st Shishya, 2nd Guru, 3rd Admin)
+  // Strict Auth Guard: User MUST log in before any home or dashboard pages are accessible!
+  if (!currentUser || activeView === 'LOGIN') {
+    return (
+      <LoginPageView
+        onLoginSuccess={handleLoginSuccess}
+        onBackToLanding={() => setActiveView('LANDING')}
+      />
+    );
+  }
+
+  // Workspace Layout with Left Forest-Green Sidebar & Top Navigation Bar (Screens 4-12)
   return (
-    <div className="min-h-screen bg-[#fcfaf6] text-stone-900 font-sans flex flex-col justify-between selection:bg-[#8c1c1c] selection:text-white">
+    <div className="flex h-screen w-full bg-[#f3f5f4] text-stone-900 font-sans overflow-hidden">
       
-      <div>
-        {/* Header */}
-        <Header
+      {/* Left Sidebar */}
+      <Sidebar
+        activeView={activeView}
+        setActiveView={handleNavigateView}
+        onLogout={handleLogout}
+        currentRole={currentRole}
+      />
+
+      {/* Main App Container */}
+      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+        
+        {/* Top Header */}
+        <AppHeader
+          activeView={activeView}
+          setActiveView={handleNavigateView}
           currentRole={currentRole}
           setCurrentRole={setCurrentRole}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          onStartDemoTour={handleStartDemoTour}
-          demoStep={demoStep}
+          currentUser={currentUser}
+          onLogout={handleLogout}
+          onOpenAuth={() => setIsAuthModalOpen(true)}
+          onOpenRoleSelection={() => setIsRoleModalOpen(true)}
         />
 
-        {/* Demo Banner */}
-        <JudgeDemoBanner
-          demoStep={demoStep}
-          setDemoStep={setDemoStep}
-          onExecuteStep={handleExecuteDemoStep}
-          onResetDemo={handleResetDemo}
-        />
+        {/* View Main Content Area */}
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+          <div className="max-w-7xl mx-auto pb-12">
+            
+            {/* Screen 4: Heritage Dashboard */}
+            {activeView === 'DASHBOARD' && (
+              <HeritageDashboardView
+                traditions={traditions}
+                onSelectTradition={handleSelectTradition}
+                onNavigateView={handleNavigateView}
+              />
+            )}
 
-        {/* Main Content Area */}
-        <main className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-6 space-y-6 flex-1">
-          
-          {/* Main Navigation Tabs */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-stone-200">
-            {tabs.map((tab) => {
-              const Icon = tab.icon;
-              const active = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition whitespace-nowrap ${
-                    active
-                      ? 'bg-[#0f2a4a] text-white shadow'
-                      : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
-                  }`}
-                >
-                  <Icon className={`w-4 h-4 ${active ? 'text-amber-400' : 'text-[#0f2a4a]'}`} />
-                  <span>{tab.label}</span>
-                </button>
-              );
-            })}
+            {/* Screen 5: Heritage Map */}
+            {activeView === 'MAP' && (
+              <HeritageMapView
+                traditions={traditions}
+                onSelectTradition={handleSelectTradition}
+              />
+            )}
+
+            {/* Screen 6: Traditions Explorer */}
+            {activeView === 'EXPLORER' && (
+              <TraditionsExplorerView
+                traditions={traditions}
+                onSelectTradition={handleSelectTradition}
+                onOpenAddTradition={() => handleNavigateView('ADD_TRADITION')}
+              />
+            )}
+
+            {/* Screen 7: Tradition Details */}
+            {activeView === 'TRADITION_DETAIL' && (
+              <TraditionDetailView
+                tradition={selectedTradition}
+                onBack={() => handleNavigateView('EXPLORER')}
+                onNavigateToMatching={() => handleNavigateView('MATCHING')}
+                onNavigateToAiAnalysis={() => handleNavigateView('AI_ANALYSIS')}
+              />
+            )}
+
+            {/* Screen 8: Add / Register Tradition */}
+            {activeView === 'ADD_TRADITION' && (
+              <AddTraditionView
+                onBack={() => handleNavigateView('EXPLORER')}
+                onSaveTradition={handleSaveNewTradition}
+              />
+            )}
+
+            {/* Screen 9: Practitioner Dashboard */}
+            {activeView === 'PRACTITIONER_DASHBOARD' && (
+              <PractitionerDashboardView />
+            )}
+
+            {/* Screen 10: Learner Dashboard */}
+            {activeView === 'LEARNER_DASHBOARD' && (
+              <LearnerDashboardView
+                onNavigateToMatching={() => handleNavigateView('MATCHING')}
+                onSelectTradition={handleSelectTradition}
+                traditions={traditions}
+              />
+            )}
+
+            {/* Screen 11: Master-Learner Matching */}
+            {activeView === 'MATCHING' && (
+              <MasterMatchingView
+                onSelectTradition={handleSelectTradition}
+                traditions={traditions}
+              />
+            )}
+
+            {/* Screen 12: AI Heritage Analysis */}
+            {activeView === 'AI_ANALYSIS' && (
+              <AiAnalysisView
+                traditions={traditions}
+                onUpdateTraditionScore={() => {}}
+              />
+            )}
+
+            {/* Supporting View: Documentation Vault */}
+            {activeView === 'DOCUMENTATION' && (
+              <KnowledgeVaultView
+                archivedItems={archivedItems}
+                onAddArchivedItem={(item) => setArchivedItems([item, ...archivedItems])}
+              />
+            )}
+
+            {/* Supporting View: Validation Queue */}
+            {activeView === 'VALIDATION' && (
+              <ValidationQueueView
+                queue={queue}
+                onApproveItem={(id) => {
+                  setQueue(prev => prev.map(q => q.id === id ? { ...q, status: 'COMMUNITY_VALIDATED' } : q));
+                }}
+              />
+            )}
+
+            {/* Supporting View: Recommendations */}
+            {activeView === 'RECOMMENDATIONS' && (
+              <RecommendationEngineView
+                traditions={traditions}
+                onNavigateTab={(tab) => {
+                  if (tab === 'MATCHMAKER') handleNavigateView('MATCHING');
+                  else if (tab === 'HTHS') handleNavigateView('AI_ANALYSIS');
+                  else handleNavigateView('DASHBOARD');
+                }}
+              />
+            )}
+
+            {/* Supporting View: Settings Profile & Information (Full Shishya / Guru Details) */}
+            {activeView === 'SETTINGS' && (
+              <SettingsProfileView
+                currentRole={currentRole}
+                onLogout={handleLogout}
+              />
+            )}
+
           </div>
-
-          {/* Tab Views */}
-          {activeTab === 'DASHBOARD' && (
-            <DashboardView
-              traditions={traditions}
-              onSelectTradition={(t) => setSelectedTradition(t)}
-              onNavigateTab={(tab) => setActiveTab(tab)}
-            />
-          )}
-
-          {activeTab === 'HTHS' && (
-            <TransmissionEngineView
-              traditions={traditions}
-              selectedTradition={traditions[0]}
-              onUpdateTraditionScore={handleUpdateTraditionScore}
-            />
-          )}
-
-          {activeTab === 'MATCHMAKER' && (
-            <MatchmakerView
-              masters={masters}
-              learners={learners}
-            />
-          )}
-
-          {activeTab === 'VAULT' && (
-            <KnowledgeVaultView
-              archivedItems={archivedItems}
-              onAddArchivedItem={(item) => setArchivedItems([item, ...archivedItems])}
-            />
-          )}
-
-          {activeTab === 'VALIDATION' && (
-            <ValidationQueueView
-              queue={queue}
-              onApproveItem={(id) => {
-                setQueue(prev => prev.map(q => q.id === id ? { ...q, status: 'COMMUNITY_VALIDATED' } : q));
-                handleUpdateTraditionScore('powada-01', 42, traditions[0].indicators, 'VULNERABLE');
-              }}
-            />
-          )}
-
-          {activeTab === 'RECOMMENDATIONS' && (
-            <RecommendationEngineView
-              traditions={traditions}
-              onNavigateTab={(tab) => setActiveTab(tab)}
-            />
-          )}
-
         </main>
+
       </div>
 
-      {/* Tradition Detail Modal */}
-      {selectedTradition && (
-        <TraditionModal
-          tradition={selectedTradition}
-          onClose={() => setSelectedTradition(null)}
-          onNavigateTab={(tab) => setActiveTab(tab)}
-        />
-      )}
+      {/* Global Modals */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onSuccessfulAuth={handleSuccessfulAuth}
+      />
 
-      {/* Footer */}
-      <footer className="w-full mt-12 border-t border-stone-200 bg-white py-6 px-4 sm:px-6 lg:px-12 text-stone-600 text-xs">
-        <div className="w-full max-w-[1920px] mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <span className="font-cinzel font-bold text-[#8c1c1c] text-sm">संस्कृती सुरक्षा • SANSKRITI SURAKSHA</span>
-            <span className="text-[10px] bg-amber-50 border border-amber-200 text-amber-900 px-2 py-0.5 rounded font-bold">
-              Pan-India Living Heritage Registry
-            </span>
-          </div>
-
-          <p className="text-stone-500 font-medium">
-            Detect → Explain → Connect → Preserve • AI-Powered Living Heritage Early Warning System
-          </p>
-
-          <div className="text-stone-500 font-semibold">
-            Competitively Validated Innovation System
-          </div>
-        </div>
-      </footer>
+      <RoleSelectionModal
+        isOpen={isRoleModalOpen}
+        onClose={() => setIsRoleModalOpen(false)}
+        onSelectRole={handleRoleSelection}
+      />
 
     </div>
   );

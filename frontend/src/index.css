@@ -2,31 +2,25 @@
 
 @layer base {
   :root {
-    --gold-primary: #d4af37;
-    --gold-light: #fef3c7;
-    --indigo-royal: #0f2a4a;
-    --indigo-dark: #091b30;
-    --saffron-sacred: #d97706;
-    --saffron-bright: #ea580c;
-    --bg-parchment: #fcfaf6;
-    --card-bg: #ffffff;
-    --text-main: #0f172a;
-    --text-muted: #475569;
+    --brand-forest-dark: #0e2a22;
+    --brand-forest-mid: #133e31;
+    --brand-forest-light: #1b4e3e;
+    --brand-gold: #eab308;
+    --brand-gold-warm: #d97706;
+    --risk-strong: #16a34a;
+    --risk-vulnerable: #ea580c;
+    --risk-critical: #dc2626;
   }
 
-html, body, #root {
-  min-height: 100vh;
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  overflow-x: hidden;
-}
-
-body {
-  background-color: #fcfaf6;
-  color: #0f172a;
-  font-family: 'Plus Jakarta Sans', sans-serif;
-}
+  html, body, #root {
+    min-height: 100vh;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    background-color: #f3f5f4;
+    color: #0f172a;
+  }
 }
 
 .font-cinzel {
@@ -35,43 +29,6 @@ body {
 
 .font-marcellus {
   font-family: 'Marcellus', serif;
-}
-
-.font-rozha {
-  font-family: 'Rozha One', serif;
-}
-
-/* Royal Temple Indigo & Sacred Saffron Heritage Palette */
-.heritage-title {
-  color: #0f2a4a;
-  font-family: 'Cinzel', serif;
-  font-weight: 700;
-}
-
-.indigo-gradient-bg {
-  background: linear-gradient(135deg, #0f2a4a 0%, #091a30 100%);
-}
-
-.saffron-gradient-bg {
-  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
-}
-
-.gold-badge {
-  background-color: #fffbeb;
-  border: 1px solid #fde68a;
-  color: #92400e;
-}
-
-.clean-card {
-  background-color: #ffffff;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
-  transition: all 0.2s ease-in-out;
-}
-
-.clean-card:hover {
-  border-color: #cbd5e1;
-  box-shadow: 0 4px 12px -2px rgba(15, 42, 74, 0.08);
 }
 
 /* Custom Scrollbar */
@@ -84,8 +41,41 @@ body {
 }
 ::-webkit-scrollbar-thumb {
   background: #cbd5e1;
-  border-radius: 3px;
+  border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+/* Donut chart gradient & radial helpers */
+.donut-conic {
+  background: conic-gradient(
+    #16a34a 0% 37.5%,
+    #ea580c 37.5% 71.9%,
+    #dc2626 71.9% 100%
+  );
+}
+
+.radial-gauge-critical {
+  background: conic-gradient(
+    #dc2626 0% 32%,
+    #e2e8f0 32% 100%
+  );
+}
+
+/* Clean cards with subtle elevation */
+.blueprint-card {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.03), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
+}
+
+.blueprint-card:hover {
+  border-color: #d1d5db;
+}
+
+/* Indian architectural arch border motif */
+.arch-card-header {
+  background-image: radial-gradient(circle at 50% -20%, rgba(217, 119, 6, 0.08) 0%, transparent 70%);
 }
