@@ -17,15 +17,14 @@ export default function AddTraditionView({ onBack, onSaveTradition }) {
 
   const states = [
     'Maharashtra',
-    'Rajasthan',
-    'Kerala',
-    'West Bengal',
-    'Assam',
-    'Madhya Pradesh',
+    'Punjab',
     'Gujarat',
-    'Karnataka',
-    'Tamil Nadu',
-    'Odisha'
+    'Delhi',
+    'Madhya Pradesh',
+    'Uttar Pradesh',
+    'Assam',
+    'Kerala',
+    'Himachal Pradesh'
   ];
 
   const languages = [

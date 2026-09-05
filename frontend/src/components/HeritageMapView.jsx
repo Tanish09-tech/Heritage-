@@ -5,245 +5,90 @@ import {
   ChevronRight, 
   Compass, 
   Sparkles,
-  Users,
   Eye,
-  CheckCircle,
-  AlertTriangle,
   Flame,
   Info
 } from 'lucide-react';
 
-// Indian states data with exact percentage coordinates matching the user's provided map
+// Indian states data - Strictly containing the 9 active focus states
 export const INDIA_STATES_DATA = [
-  {
-    id: "JK",
-    name: "Jammu and Kashmir",
-    aliases: ["Jammu and Kashmir", "Jammu & Kashmir", "Ladakh"],
-    zone: "NORTH",
-    code: "JK",
-    center: { x: 36.8, y: 11.8 }
-  },
-  {
-    id: "HP",
-    name: "Himachal Pradesh",
-    aliases: ["Himachal Pradesh"],
-    zone: "NORTH",
-    code: "HP",
-    center: { x: 39.1, y: 18.9 }
-  },
-  {
-    id: "PB",
-    name: "Punjab",
-    aliases: ["Punjab"],
-    zone: "NORTH",
-    code: "PB",
-    center: { x: 31.5, y: 22.7 }
-  },
-  {
-    id: "UK",
-    name: "Uttarakhand",
-    aliases: ["Uttarakhand"],
-    zone: "NORTH",
-    code: "UK",
-    center: { x: 45.9, y: 24.6 }
-  },
-  {
-    id: "HR",
-    name: "Haryana",
-    aliases: ["Haryana", "Delhi"],
-    zone: "NORTH",
-    code: "HR",
-    center: { x: 35.1, y: 27.3 }
-  },
-  {
-    id: "RJ",
-    name: "Rajasthan",
-    aliases: ["Rajasthan"],
-    zone: "NORTH",
-    code: "RJ",
-    center: { x: 32.0, y: 36.8 }
-  },
-  {
-    id: "UP",
-    name: "Uttar Pradesh",
-    aliases: ["Uttar Pradesh"],
-    zone: "CENTRAL",
-    code: "UP",
-    center: { x: 52.6, y: 35.0 }
-  },
-  {
-    id: "BR",
-    name: "Bihar",
-    aliases: ["Bihar"],
-    zone: "EAST",
-    code: "BR",
-    center: { x: 67.6, y: 41.5 }
-  },
-  {
-    id: "SK",
-    name: "Sikkim",
-    aliases: ["Sikkim"],
-    zone: "EAST",
-    code: "SK",
-    center: { x: 74.9, y: 33.0 }
-  },
-  {
-    id: "WB",
-    name: "West Bengal",
-    aliases: ["West Bengal", "Bengal"],
-    zone: "EAST",
-    code: "WB",
-    center: { x: 75.5, y: 48.1 }
-  },
-  {
-    id: "JH",
-    name: "Jharkhand",
-    aliases: ["Jharkhand"],
-    zone: "EAST",
-    code: "JH",
-    center: { x: 65.2, y: 46.5 }
-  },
-  {
-    id: "OD",
-    name: "Odisha",
-    aliases: ["Odisha", "Orissa"],
-    zone: "EAST",
-    code: "OD",
-    center: { x: 63.6, y: 58.0 }
-  },
-  {
-    id: "CG",
-    name: "Chhattisgarh",
-    aliases: ["Chhattisgarh"],
-    zone: "CENTRAL",
-    code: "CG",
-    center: { x: 55.4, y: 52.7 }
-  },
-  {
-    id: "MP",
-    name: "Madhya Pradesh",
-    aliases: ["Madhya Pradesh"],
-    zone: "CENTRAL",
-    code: "MP",
-    center: { x: 46.4, y: 51.4 }
-  },
-  {
-    id: "GJ",
-    name: "Gujarat",
-    aliases: ["Gujarat"],
-    zone: "WEST",
-    code: "GJ",
-    center: { x: 17.7, y: 50.3 }
-  },
   {
     id: "MH",
     name: "Maharashtra",
-    aliases: ["Maharashtra"],
+    aliases: ["Maharashtra", "MH"],
     zone: "WEST",
     code: "MH",
     center: { x: 33.1, y: 62.6 }
   },
   {
-    id: "GA",
-    name: "Goa",
-    aliases: ["Goa"],
+    id: "PB",
+    name: "Punjab",
+    aliases: ["Punjab", "PB"],
+    zone: "NORTH",
+    code: "PB",
+    center: { x: 31.5, y: 22.7 }
+  },
+  {
+    id: "GJ",
+    name: "Gujarat",
+    aliases: ["Gujarat", "Gujrat", "GJ"],
     zone: "WEST",
-    code: "GA",
-    center: { x: 19.8, y: 75.9 }
+    code: "GJ",
+    center: { x: 17.7, y: 50.3 }
   },
   {
-    id: "KA",
-    name: "Karnataka",
-    aliases: ["Karnataka"],
-    zone: "SOUTH",
-    code: "KA",
-    center: { x: 32.1, y: 80.8 }
+    id: "DL",
+    name: "Delhi",
+    aliases: ["Delhi", "New Delhi", "DL", "NCT of Delhi"],
+    zone: "NORTH",
+    code: "DL",
+    center: { x: 36.5, y: 28.5 }
   },
   {
-    id: "AP",
-    name: "Andhra Pradesh",
-    aliases: ["Andhra Pradesh", "Telangana"],
-    zone: "SOUTH",
-    code: "AP",
-    center: { x: 45.1, y: 72.0 }
+    id: "MP",
+    name: "Madhya Pradesh",
+    aliases: ["Madhya Pradesh", "MP"],
+    zone: "CENTRAL",
+    code: "MP",
+    center: { x: 46.4, y: 51.4 }
   },
   {
-    id: "TN",
-    name: "Tamil Nadu",
-    aliases: ["Tamil Nadu"],
-    zone: "SOUTH",
-    code: "TN",
-    center: { x: 38.4, y: 90.7 }
-  },
-  {
-    id: "KL",
-    name: "Kerala",
-    aliases: ["Kerala"],
-    zone: "SOUTH",
-    code: "KL",
-    center: { x: 29.2, y: 94.0 }
+    id: "UP",
+    name: "Uttar Pradesh",
+    aliases: ["Uttar Pradesh", "UP"],
+    zone: "CENTRAL",
+    code: "UP",
+    center: { x: 52.6, y: 35.0 }
   },
   {
     id: "AS",
     name: "Assam",
-    aliases: ["Assam"],
+    aliases: ["Assam", "Assaam", "AS"],
     zone: "EAST",
     code: "AS",
     center: { x: 86.0, y: 36.5 }
   },
   {
-    id: "AR",
-    name: "Arunachal Pradesh",
-    aliases: ["Arunachal Pradesh"],
-    zone: "EAST",
-    code: "AR",
-    center: { x: 92.5, y: 28.5 }
+    id: "KL",
+    name: "Kerala",
+    aliases: ["Kerala", "KL"],
+    zone: "SOUTH",
+    code: "KL",
+    center: { x: 29.2, y: 94.0 }
   },
   {
-    id: "NL",
-    name: "Nagaland",
-    aliases: ["Nagaland"],
-    zone: "EAST",
-    code: "NL",
-    center: { x: 92.5, y: 36.5 }
-  },
-  {
-    id: "MN",
-    name: "Manipur",
-    aliases: ["Manipur"],
-    zone: "EAST",
-    code: "MN",
-    center: { x: 90.5, y: 41.0 }
-  },
-  {
-    id: "MZ",
-    name: "Mizoram",
-    aliases: ["Mizoram"],
-    zone: "EAST",
-    code: "MZ",
-    center: { x: 87.0, y: 46.5 }
-  },
-  {
-    id: "TR",
-    name: "Tripura",
-    aliases: ["Tripura"],
-    zone: "EAST",
-    code: "TR",
-    center: { x: 83.5, y: 46.0 }
-  },
-  {
-    id: "ML",
-    name: "Meghalaya",
-    aliases: ["Meghalaya"],
-    zone: "EAST",
-    code: "ML",
-    center: { x: 82.5, y: 39.5 }
+    id: "HP",
+    name: "Himachal Pradesh",
+    aliases: ["Himachal Pradesh", "HP"],
+    zone: "NORTH",
+    code: "HP",
+    center: { x: 39.1, y: 18.9 }
   }
 ];
 
 // Helper to find corresponding state data from a tradition state name
 export function matchStateObject(stateName) {
-  if (!stateName) return INDIA_STATES_DATA.find(s => s.id === 'MH');
+  if (!stateName) return null;
   const clean = stateName.toLowerCase().trim();
   const directMatch = INDIA_STATES_DATA.find(s => 
     s.name.toLowerCase() === clean || 
@@ -255,7 +100,7 @@ export function matchStateObject(stateName) {
     clean.includes(s.name.toLowerCase()) || 
     s.aliases.some(a => clean.includes(a.toLowerCase()))
   );
-  return partialMatch || INDIA_STATES_DATA.find(s => s.id === 'MH');
+  return partialMatch || null;
 }
 
 export default function HeritageMapView({ traditions, onSelectTradition }) {
@@ -265,24 +110,27 @@ export default function HeritageMapView({ traditions, onSelectTradition }) {
   const [hoveredState, setHoveredState] = useState(null);
   const mapContainerRef = useRef(null);
 
-  // Harmonize traditions with mapped state
+  // Harmonize traditions with only the 9 allowed states
   const allTraditions = useMemo(() => {
-    return (traditions || []).map((t) => {
-      const stateObj = matchStateObject(t.state);
-      return {
-        ...t,
-        marathi: t.marathiName || t.marathi || t.name,
-        stateObj: stateObj,
-        zone: t.zone || stateObj.zone,
-        state: t.state || stateObj.name
-      };
-    });
+    return (traditions || [])
+      .map((t) => {
+        const stateObj = matchStateObject(t.state);
+        if (!stateObj) return null;
+        return {
+          ...t,
+          marathi: t.marathiName || t.marathi || t.name,
+          stateObj: stateObj,
+          zone: t.zone || stateObj.zone,
+          state: stateObj.name
+        };
+      })
+      .filter(Boolean);
   }, [traditions]);
 
   // Current active state object
   const activeStateName = hoveredState || selectedState;
   const activeStateObj = useMemo(() => {
-    return matchStateObject(activeStateName);
+    return matchStateObject(activeStateName) || INDIA_STATES_DATA[0];
   }, [activeStateName]);
 
   // Traditions belonging to the active state
@@ -305,7 +153,7 @@ export default function HeritageMapView({ traditions, onSelectTradition }) {
     return counts;
   }, [allTraditions]);
 
-  // Calculate pan-India risk stats
+  // Calculate risk stats for the 9 states
   const riskStats = useMemo(() => {
     const counts = { STRONG: 0, VULNERABLE: 0, CRITICAL: 0 };
     allTraditions.forEach(t => {
@@ -318,17 +166,19 @@ export default function HeritageMapView({ traditions, onSelectTradition }) {
   const handleStateSelect = (stateName) => {
     setSelectedState(stateName);
     const targetObj = matchStateObject(stateName);
-    if (selectedZone !== 'ALL' && selectedZone !== targetObj.zone) {
+    if (targetObj && selectedZone !== 'ALL' && selectedZone !== targetObj.zone) {
       setSelectedZone('ALL');
     }
     // Auto-select first tradition in this state if available
-    const traditionsInTarget = allTraditions.filter(t => t.stateObj.id === targetObj.id);
-    if (traditionsInTarget.length > 0) {
-      setSelectedPinId(traditionsInTarget[0].id);
+    if (targetObj) {
+      const traditionsInTarget = allTraditions.filter(t => t.stateObj.id === targetObj.id);
+      if (traditionsInTarget.length > 0) {
+        setSelectedPinId(traditionsInTarget[0].id);
+      }
     }
   };
 
-  // Click on the map image calculates the closest state
+  // Click on the map image calculates the closest state among the 9 active states
   const handleMapClick = (e) => {
     if (!mapContainerRef.current) return;
     const rect = mapContainerRef.current.getBoundingClientRect();
@@ -348,8 +198,8 @@ export default function HeritageMapView({ traditions, onSelectTradition }) {
       }
     });
 
-    // If within reasonable proximity (15% radius), select the state
-    if (closest && minDistance < 15) {
+    // Proximity threshold: only select if close enough to one of the 9 states
+    if (closest && minDistance < 13) {
       handleStateSelect(closest.name);
     }
   };
@@ -375,7 +225,7 @@ export default function HeritageMapView({ traditions, onSelectTradition }) {
               </span>
             </div>
             <p className="text-xs text-stone-500">
-              Interactive cultural cartography • Select or touch any state on the map to inspect living traditions
+              Living cultural cartography across 9 focus states • Select any state on the map to inspect living traditions
             </p>
           </div>
         </div>
@@ -383,7 +233,7 @@ export default function HeritageMapView({ traditions, onSelectTradition }) {
         {/* Upper Right: Zone Dropdown & State Dropdown */}
         <div className="flex flex-wrap items-center gap-3">
           
-          {/* Zone Dropdown List: West, North, South, East, Central */}
+          {/* Zone Dropdown List restricted to active zones */}
           <div className="flex items-center gap-2 bg-stone-50 border border-stone-200 px-3.5 py-2 rounded-xl shadow-2xs">
             <Layers className="w-4 h-4 text-stone-400" />
             <span className="text-xs font-semibold text-stone-500">Zone:</span>
@@ -399,23 +249,23 @@ export default function HeritageMapView({ traditions, onSelectTradition }) {
               }}
               className="bg-transparent text-xs font-bold text-stone-900 focus:outline-hidden cursor-pointer"
             >
-              <option value="ALL">All India (Pan-India)</option>
-              <option value="WEST">West Zone (Maharashtra, Gujarat, Goa)</option>
-              <option value="NORTH">North Zone (Punjab, Rajasthan, HP, J&K, Haryana, UK)</option>
-              <option value="SOUTH">South Zone (Kerala, Tamil Nadu, Karnataka, AP...)</option>
-              <option value="EAST">East & NE Zone (Bengal, Odisha, Assam, NE...)</option>
-              <option value="CENTRAL">Central Zone (Madhya Pradesh, UP, Chhattisgarh)</option>
+              <option value="ALL">All Focus States ({INDIA_STATES_DATA.length})</option>
+              <option value="WEST">West Zone (Maharashtra, Gujarat)</option>
+              <option value="NORTH">North Zone (Punjab, Himachal Pradesh, Delhi)</option>
+              <option value="CENTRAL">Central Zone (Madhya Pradesh, Uttar Pradesh)</option>
+              <option value="SOUTH">South Zone (Kerala)</option>
+              <option value="EAST">East Zone (Assam)</option>
             </select>
           </div>
 
-          {/* State Quick Selector */}
+          {/* State Quick Selector restricted to the 9 states */}
           <div className="flex items-center gap-2 bg-stone-50 border border-stone-200 px-3.5 py-2 rounded-xl shadow-2xs">
             <MapPin className="w-4 h-4 text-[#3b4d66]" />
             <span className="text-xs font-semibold text-stone-500">State:</span>
             <select
               value={selectedState}
               onChange={(e) => handleStateSelect(e.target.value)}
-              className="bg-transparent text-xs font-bold text-stone-900 focus:outline-hidden cursor-pointer max-w-[190px]"
+              className="bg-transparent text-xs font-bold text-stone-900 focus:outline-hidden cursor-pointer max-w-[200px]"
             >
               {INDIA_STATES_DATA.map((st) => {
                 const count = stateTraditionCounts[st.id] || 0;
@@ -432,24 +282,9 @@ export default function HeritageMapView({ traditions, onSelectTradition }) {
 
       </div>
 
-      {/* Main Map Container: Clean Ivory Canvas displaying the user's authentic map */}
+      {/* Main Map Container: Clean Ivory Canvas displaying the authentic political map */}
       <div className="relative bg-[#fbfaf6] rounded-3xl border border-stone-300/80 overflow-hidden shadow-md min-h-[640px] flex flex-col lg:flex-row items-center justify-between p-4 sm:p-6 gap-6">
         
-        {/* Top-Left Status Bar */}
-        <div className="absolute top-5 left-5 z-20 flex items-center gap-2 bg-white/95 backdrop-blur-md px-4 py-2 rounded-xl border border-stone-200/90 shadow-sm">
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="text-xs font-bold text-stone-800">
-            Active State: <span className="text-[#2e3e55] font-extrabold">{activeStateObj.name}</span>
-          </span>
-          <span className="text-stone-300 text-xs">•</span>
-          <span className="text-xs text-stone-600 font-semibold">
-            {stateTraditions.length} Traditions Recorded
-          </span>
-          <span className="text-stone-300 text-xs">•</span>
-          <span className="text-[10px] uppercase tracking-wider font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200/60">
-            {activeStateObj.zone} ZONE
-          </span>
-        </div>
 
         {/* Center: Real Political Heritage Map with Overlay Layers */}
         <div className="relative flex-1 w-full flex items-center justify-center my-4 lg:my-0">
@@ -471,7 +306,7 @@ export default function HeritageMapView({ traditions, onSelectTradition }) {
               <div className="absolute inset-0 rounded-2xl pointer-events-none bg-stone-900/10 transition-opacity duration-300" />
             )}
 
-            {/* State Badges and Hotspot Targets */}
+            {/* State Badges and Hotspot Targets for the 9 states */}
             {INDIA_STATES_DATA.map((st) => {
               const isSelected = activeStateObj.id === st.id;
               const isHovered = hoveredState === st.name;
@@ -521,7 +356,7 @@ export default function HeritageMapView({ traditions, onSelectTradition }) {
                       </div>
                     </div>
                   ) : (
-                    /* Subtle Dot for states with 0 recorded traditions */
+                    /* Subtle Dot for state */
                     <div className={`w-3.5 h-3.5 rounded-full border transition-all ${
                       isSelected
                         ? 'bg-amber-500 border-white ring-2 ring-amber-400 scale-125'
@@ -531,20 +366,7 @@ export default function HeritageMapView({ traditions, onSelectTradition }) {
                     }`} />
                   )}
 
-                  {/* Hover Tooltip for State */}
-                  {(isHovered || isSelected) && (
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-40 whitespace-nowrap bg-stone-900/95 backdrop-blur-md text-white px-3 py-1.5 rounded-xl shadow-xl border border-stone-700 pointer-events-none text-center animate-fade-in">
-                      <div className="font-bold text-xs text-white flex items-center justify-center gap-1">
-                        <span>{st.name}</span>
-                        {isSelected && <span className="text-[10px] text-amber-400 font-extrabold">• Active</span>}
-                      </div>
-                      <div className="text-[10px] text-stone-300 flex items-center justify-center gap-2 mt-0.5">
-                        <span className="text-amber-300 font-bold">{count} traditions</span>
-                        <span>•</span>
-                        <span className="text-stone-400">{st.zone} Zone</span>
-                      </div>
-                    </div>
-                  )}
+
                 </div>
               );
             })}
@@ -604,17 +426,6 @@ export default function HeritageMapView({ traditions, onSelectTradition }) {
                         }`} />
                       </span>
 
-                      {/* Pin Hover / Selected Tooltip */}
-                      <div className={`absolute bottom-full mb-1 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap bg-stone-900 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-xl pointer-events-none z-40 flex items-center gap-1.5 border border-stone-700 ${
-                        isSelected ? 'opacity-100' : ''
-                      }`}>
-                        <span>{trad.name}</span>
-                        <span className={`px-1.5 py-0.2 rounded text-[9px] ${
-                          isCritical ? 'bg-red-950 text-red-300' : isVulnerable ? 'bg-amber-950 text-amber-300' : 'bg-emerald-950 text-emerald-300'
-                        }`}>
-                          {trad.score}/100
-                        </span>
-                      </div>
                     </div>
                   </div>
                 );
@@ -623,7 +434,7 @@ export default function HeritageMapView({ traditions, onSelectTradition }) {
 
             {/* Bottom-Right Stamp */}
             <div className="absolute bottom-2 right-2 pointer-events-none bg-white/80 backdrop-blur-xs px-2.5 py-1 rounded-md border border-stone-200 text-[9px] font-bold text-stone-500 tracking-wider uppercase">
-              Living Heritage GIS
+              9 Focus States GIS
             </div>
 
           </div>
@@ -637,7 +448,7 @@ export default function HeritageMapView({ traditions, onSelectTradition }) {
             <div className="flex items-center justify-between mb-3">
               <h4 className="font-bold text-xs text-stone-900 tracking-wide uppercase flex items-center gap-1.5">
                 <Flame className="w-3.5 h-3.5 text-amber-600" />
-                <span>Pan-India Risk Overview</span>
+                <span>Focus States Risk Overview</span>
               </h4>
               <span className="text-[10px] font-bold text-stone-500 bg-stone-100 px-2 py-0.5 rounded-full">
                 {allTraditions.length} Total
@@ -736,7 +547,7 @@ export default function HeritageMapView({ traditions, onSelectTradition }) {
                   <Info className="w-5 h-5 mx-auto mb-2 text-stone-400" />
                   <p className="font-medium text-stone-700 mb-1">No traditions registered yet</p>
                   <p className="text-[11px] text-stone-400">
-                    Touch any state with a heritage marker on the map to view its active traditions.
+                    Select any of the 9 states to view its active traditions.
                   </p>
                 </div>
               )}

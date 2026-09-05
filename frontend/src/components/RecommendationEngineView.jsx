@@ -34,16 +34,16 @@ export default function RecommendationEngineView({ traditions, onNavigateTab }) 
     },
     {
       id: 'rec-03',
-      traditionName: 'Kalbelia Folk Dance (Rajasthan)',
-      score: 44,
-      status: 'VULNERABLE',
-      detectedProblem: 'Commercialization Diluting Sacred Oral Song Lyrics',
-      recommendedIntervention: 'Jodhpur Folk Heritage Academy Mother-Daughter Residency',
+      traditionName: 'Bhavai Folk Street Theatre (Gujarat)',
+      score: 42,
+      status: 'CRITICAL',
+      detectedProblem: 'Severe Loss of Traditional Vesha Performers and Village Mandalis',
+      recommendedIntervention: 'North Gujarat Master-Apprentice Performance Residency',
       actionSteps: [
-        'Sponsor Thar desert oral song workshops in Jodhpur and Barmer',
-        'Provide Poongi flute crafting stipends for traditional artisan families'
+        'Sponsor village mandali seasonal performance grants in Mehsana and Patan',
+        'Pair Nayak master actors with 12 young apprentices across Saurashtra and North Gujarat'
       ],
-      impact: 'Improves Intergenerational Transmission score from 40% to 75%'
+      impact: 'Improves Intergenerational Transmission score from 35% to 70%'
     }
   ];
 

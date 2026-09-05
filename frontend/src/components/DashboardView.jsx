@@ -13,7 +13,7 @@ export default function DashboardView({ traditions, onSelectTradition, onNavigat
   const monitoringCount = traditions.filter(t => t.status === 'MONITORING').length;
   const strongCount = traditions.filter(t => t.status === 'STRONG').length;
 
-  const statesList = ['ALL', 'Maharashtra', 'Rajasthan', 'Kerala', 'West Bengal / Jharkhand', 'Assam', 'Madhya Pradesh'];
+  const statesList = ['ALL', 'Maharashtra', 'Punjab', 'Gujarat', 'Delhi', 'Madhya Pradesh', 'Uttar Pradesh', 'Assam', 'Kerala', 'Himachal Pradesh'];
 
   const filteredTraditions = traditions.filter(t => {
     const matchesSearch = t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||

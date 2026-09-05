@@ -1,16 +1,13 @@
-# React + Vite
+# Sanskriti Suraksha Frontend
+### React 19 + Vite 8 + Tailwind CSS v4
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+This directory contains the client application for **Sanskriti Suraksha** (Pan-India Living Heritage Early Warning & Knowledge Transmission System).
 
-Currently, two official plugins are available:
+For complete platform documentation, architecture breakdowns, and system details, please refer to [**FULL_DETAILS.md**](../FULL_DETAILS.md).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Available Scripts
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+- `npm run dev`: Starts the Vite local development server with HMR.
+- `npm run build`: Bundles optimized assets for production in `dist/`.
+- `npm run preview`: Previews the production build locally.
+- `npm run lint`: Runs Oxlint checks across the codebase.
