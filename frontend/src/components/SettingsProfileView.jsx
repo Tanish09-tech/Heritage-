@@ -23,7 +23,7 @@ import {
   BadgeCheck
 } from 'lucide-react';
 
-export default function SettingsProfileView({ currentRole, onLogout }) {
+export default function SettingsProfileView({ currentRole, currentUser, onLogout }) {
   const [activeTab, setActiveTab] = useState('PROFILE'); // 'PROFILE' | 'PREFERENCES' | 'SECURITY'
   const [alertPref, setAlertPref] = useState(true);
   const [smsPref, setSmsPref] = useState(true);
@@ -31,14 +31,17 @@ export default function SettingsProfileView({ currentRole, onLogout }) {
 
   // 1. Shishya (Learner) Complete Information
   const shishyaProfile = {
-    name: 'Aniket Deshmukh',
+    name: currentUser?.name || 'Aniket Deshmukh',
     sanskritTitle: 'शिष्य • Apprentice Practitioner',
     avatar: '/images/powada.jpg',
     id: 'SHI-2026-MH-084',
-    email: 'shishya.aniket@gmail.com',
+    email: currentUser?.email || 'shishya.aniket@gmail.com',
     phone: '+91 98234 56789',
-    location: 'Pune, Maharashtra',
-    age: '22 Years',
+    location: currentUser?.state ? `${currentUser.state}, India` : 'Pune, Maharashtra',
+    state: currentUser?.state || 'Maharashtra',
+    dob: currentUser?.dob || '2002-05-15',
+    hobbies: currentUser?.hobbies || 'Shahiri Ballads, Folk Chorus, Daf Percussion',
+    age: currentUser?.dob ? `${Math.max(16, new Date().getFullYear() - new Date(currentUser.dob).getFullYear())} Years` : '22 Years',
     education: 'B.A. Cultural Heritage Studies (SPPU Pune)',
     languages: 'Marathi (Native), Hindi, English, Basic Sanskrit',
     enrollmentDate: '14 April 2026',
@@ -75,17 +78,19 @@ export default function SettingsProfileView({ currentRole, onLogout }) {
 
   // 2. Guru (Practitioner) Complete Information
   const guruProfile = {
-    name: 'Shahir Tukaram Jagtap',
+    name: currentUser?.name || 'Shahir Tukaram Jagtap',
     sanskritTitle: 'गुरु • Master Practitioner & Custodian',
     avatar: '/images/powada.jpg',
     id: 'GURU-2026-MH-007',
-    email: 'guru.tukaram@gmail.com',
+    email: currentUser?.email || 'guru.tukaram@gmail.com',
     phone: '+91 94220 12345',
-    location: 'Satara & Pune, Maharashtra',
-    age: '62 Years',
-    experience: '25+ Years of Continuous Living Tradition Parampara',
+    location: currentUser?.state ? `${currentUser.state}, India` : 'Satara & Pune, Maharashtra',
+    state: currentUser?.state || 'Maharashtra',
+    dob: currentUser?.dob || '1968-08-20',
+    age: currentUser?.dob ? `${Math.max(25, new Date().getFullYear() - new Date(currentUser.dob).getFullYear())} Years` : '62 Years',
+    experience: currentUser?.experience || '25+ Years of Continuous Living Tradition Parampara',
     lineage: 'Satara Shahiri Akhada (4th Generation Balladeer Lineage)',
-    tradition: 'Shahiri Powada (Maharashtra Ballad & Heroic Oral Tradition)',
+    tradition: currentUser?.expertTradition || 'Shahiri Powada (Maharashtra Ballad & Heroic Oral Tradition)',
     instruments: 'Daf, Tuntuna, Dimdi, Manjira Percussion',
     status: 'Accredited Living Master (Grade A)',
     verification: 'Ministry of Culture Living Master Certificate: MC-GURU-2026-8812',
@@ -239,13 +244,15 @@ export default function SettingsProfileView({ currentRole, onLogout }) {
             <div className="bg-white p-5 rounded-3xl border border-stone-200 shadow-xs space-y-3">
               <div className="flex items-center gap-2 text-xs font-bold text-stone-900">
                 <GraduationCap className="w-4 h-4 text-emerald-700" />
-                <span>Personal & Academic Details</span>
+                <span>Personal & Onboarding Details</span>
               </div>
               <div className="text-xs space-y-2 text-stone-600 pt-1">
-                <div><span className="font-bold text-stone-800">Age:</span> {shishyaProfile.age}</div>
+                <div><span className="font-bold text-stone-800">Full Name:</span> <span className="text-stone-900 font-semibold">{shishyaProfile.name}</span></div>
+                <div><span className="font-bold text-stone-800">Date of Birth (DOB):</span> <span className="text-stone-900 font-semibold">{shishyaProfile.dob}</span> ({shishyaProfile.age})</div>
+                <div><span className="font-bold text-stone-800">Hobbies & Interests:</span> <span className="text-emerald-800 font-medium">{shishyaProfile.hobbies}</span></div>
+                <div><span className="font-bold text-stone-800">State:</span> <span className="text-stone-900 font-semibold">{shishyaProfile.state}</span></div>
                 <div><span className="font-bold text-stone-800">Academic Background:</span> {shishyaProfile.education}</div>
                 <div><span className="font-bold text-stone-800">Languages:</span> {shishyaProfile.languages}</div>
-                <div><span className="font-bold text-stone-800">Enrollment Date:</span> {shishyaProfile.enrollmentDate}</div>
               </div>
             </div>
 
@@ -369,13 +376,15 @@ export default function SettingsProfileView({ currentRole, onLogout }) {
             <div className="bg-white p-5 rounded-3xl border border-stone-200 shadow-xs space-y-3">
               <div className="flex items-center gap-2 text-xs font-bold text-stone-900">
                 <Flame className="w-4 h-4 text-amber-600" />
-                <span>Art & Parampara Lineage</span>
+                <span>Master Credentials & Parampara</span>
               </div>
               <div className="text-xs space-y-2 text-stone-600 pt-1">
-                <div><span className="font-bold text-stone-800">Mastery Tradition:</span> {guruProfile.tradition}</div>
-                <div><span className="font-bold text-stone-800">Gharana / Akhada:</span> {guruProfile.lineage}</div>
-                <div><span className="font-bold text-stone-800">Instruments:</span> {guruProfile.instruments}</div>
-                <div><span className="font-bold text-stone-800">Experience:</span> {guruProfile.experience}</div>
+                <div><span className="font-bold text-stone-800">Full Name:</span> <span className="text-stone-900 font-semibold">{guruProfile.name}</span></div>
+                <div><span className="font-bold text-stone-800">State:</span> <span className="text-stone-900 font-semibold">{guruProfile.state}</span></div>
+                <div><span className="font-bold text-stone-800">Date of Birth (DOB):</span> <span className="text-stone-900 font-semibold">{guruProfile.dob}</span> ({guruProfile.age})</div>
+                <div><span className="font-bold text-stone-800">Experience:</span> <span className="text-amber-800 font-semibold">{guruProfile.experience}</span></div>
+                <div><span className="font-bold text-stone-800">Expertise / Tradition:</span> <span className="text-emerald-800 font-medium">{guruProfile.tradition}</span></div>
+                <div><span className="font-bold text-stone-800">Gharana / Lineage:</span> {guruProfile.lineage}</div>
               </div>
             </div>
 

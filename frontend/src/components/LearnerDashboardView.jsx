@@ -10,8 +10,15 @@ import {
 } from 'lucide-react';
 import { CURRENT_LEARNER } from '../data/heritageData';
 
-export default function LearnerDashboardView({ onNavigateToMatching, onSelectTradition, traditions }) {
-  const learner = CURRENT_LEARNER;
+export default function LearnerDashboardView({ onNavigateToMatching, onSelectTradition, traditions, currentUser }) {
+  const learner = {
+    ...CURRENT_LEARNER,
+    name: currentUser?.name || CURRENT_LEARNER.name,
+    location: currentUser?.state ? `${currentUser.state}, India` : CURRENT_LEARNER.location,
+    interests: currentUser?.hobbies || CURRENT_LEARNER.interests,
+    dob: currentUser?.dob || '2002-05-15',
+    hobbies: currentUser?.hobbies || CURRENT_LEARNER.interests
+  };
 
   return (
     <div className="space-y-6">
@@ -37,11 +44,18 @@ export default function LearnerDashboardView({ onNavigateToMatching, onSelectTra
                   {learner.name}
                 </h4>
                 
-                <div className="text-xs text-stone-600 space-y-0.5">
-                  <div><span className="font-semibold text-stone-700">Interest:</span> {learner.interests}</div>
-                  <div className="flex items-center gap-1 text-stone-500">
-                    <MapPin className="w-3 h-3 text-stone-400" />
-                    <span>{learner.location}</span>
+                <div className="text-xs text-stone-600 space-y-1">
+                  <div><span className="font-semibold text-stone-700">Hobbies:</span> {learner.interests}</div>
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1 text-stone-500">
+                      <MapPin className="w-3 h-3 text-stone-400" />
+                      <span>{learner.location}</span>
+                    </div>
+                    {learner.dob && (
+                      <span className="text-[11px] text-stone-500 font-medium bg-stone-100 px-2 py-0.5 rounded">
+                        DOB: {learner.dob}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>

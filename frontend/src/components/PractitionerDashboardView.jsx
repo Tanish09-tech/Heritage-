@@ -12,8 +12,17 @@ import {
 } from 'lucide-react';
 import { CURRENT_PRACTITIONER } from '../data/heritageData';
 
-export default function PractitionerDashboardView() {
-  const [practitioner, setPractitioner] = useState(CURRENT_PRACTITIONER);
+export default function PractitionerDashboardView({ currentUser }) {
+  const initialPractitioner = {
+    ...CURRENT_PRACTITIONER,
+    name: currentUser?.name || CURRENT_PRACTITIONER.name,
+    location: currentUser?.state ? `${currentUser.state}, India` : CURRENT_PRACTITIONER.location,
+    tradition: currentUser?.expertTradition || CURRENT_PRACTITIONER.tradition,
+    experience: currentUser?.experience ? `${currentUser.experience}` : CURRENT_PRACTITIONER.experience,
+    dob: currentUser?.dob || '1968-08-20'
+  };
+
+  const [practitioner, setPractitioner] = useState(initialPractitioner);
   const [requests, setRequests] = useState(CURRENT_PRACTITIONER.learnerRequests);
 
   const handleAccept = (id) => {
@@ -52,12 +61,19 @@ export default function PractitionerDashboardView() {
                   {practitioner.name}
                 </h4>
                 
-                <div className="text-xs text-stone-600 space-y-0.5">
-                  <div><span className="font-semibold text-stone-700">Tradition:</span> {practitioner.tradition}</div>
+                <div className="text-xs text-stone-600 space-y-1">
+                  <div><span className="font-semibold text-stone-700">Expertise:</span> {practitioner.tradition}</div>
                   <div><span className="font-semibold text-stone-700">Experience:</span> {practitioner.experience}</div>
-                  <div className="flex items-center gap-1 text-stone-500">
-                    <MapPin className="w-3 h-3 text-stone-400" />
-                    <span>{practitioner.location}</span>
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1 text-stone-500">
+                      <MapPin className="w-3 h-3 text-stone-400" />
+                      <span>{practitioner.location}</span>
+                    </div>
+                    {practitioner.dob && (
+                      <span className="text-[11px] text-stone-500 font-medium bg-stone-100 px-2 py-0.5 rounded">
+                        DOB: {practitioner.dob}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>

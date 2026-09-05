@@ -18,6 +18,7 @@ import KnowledgeVaultView from './components/KnowledgeVaultView';
 import ValidationQueueView from './components/ValidationQueueView';
 import RecommendationEngineView from './components/RecommendationEngineView';
 import SettingsProfileView from './components/SettingsProfileView';
+import ProfileDetailsModal from './components/ProfileDetailsModal';
 
 import { 
   PILOT_TRADITIONS, 
@@ -68,6 +69,8 @@ export default function App() {
   const [selectedTradition, setSelectedTradition] = useState(PILOT_TRADITIONS[0]);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [pendingTargetView, setPendingTargetView] = useState(null);
   const [queue, setQueue] = useState(VALIDATION_QUEUE || []);
   const [archivedItems, setArchivedItems] = useState(ARCHIVED_KNOWLEDGE_ITEMS || []);
 
@@ -92,23 +95,82 @@ export default function App() {
   };
 
   const handleRoleSelection = (roleId, targetView) => {
-    setCurrentRole(roleId);
     setIsRoleModalOpen(false);
-    if (targetView) {
-      handleNavigateView(targetView);
+    if (roleId === 'AUTHORITY') {
+      setCurrentRole('AUTHORITY');
+      if (targetView) handleNavigateView(targetView);
+      return;
     }
+
+    // Check if user already has completed details for this role
+    if (currentUser && currentUser.role === roleId && currentUser.profileCompleted) {
+      setCurrentRole(roleId);
+      if (targetView) handleNavigateView(targetView);
+      return;
+    }
+
+    // Shishya or Guru requires mandatory details to be filled before accessing dashboard!
+    const defaultName = roleId === 'LEARNER' ? 'Aniket Deshmukh' : 'Shahir Tukaram Jagtap';
+    const defaultEmail = roleId === 'LEARNER' ? 'shishya.aniket@gmail.com' : 'guru.tukaram@gmail.com';
+    const newUser = {
+      name: (currentUser?.role === roleId ? currentUser?.name : '') || defaultName,
+      role: roleId,
+      email: (currentUser?.role === roleId ? currentUser?.email : '') || defaultEmail,
+      profileCompleted: false
+    };
+    setCurrentRole(roleId);
+    setCurrentUser(newUser);
+    setPendingTargetView(targetView || (roleId === 'LEARNER' ? 'LEARNER_DASHBOARD' : 'PRACTITIONER_DASHBOARD'));
+    setIsProfileModalOpen(true);
   };
 
   const handleSuccessfulAuth = (roleId, targetView) => {
     setIsAuthModalOpen(false);
-    if (roleId) {
-      setCurrentRole(roleId);
-      if (targetView) {
-        handleNavigateView(targetView);
-        return;
-      }
+    if (roleId === 'AUTHORITY') {
+      handleLoginSuccess('AUTHORITY', targetView || 'DASHBOARD', {
+        name: 'Ministry Heritage Authority',
+        role: 'AUTHORITY',
+        email: 'admin.sanskriti@gov.in',
+        profileCompleted: true
+      });
+      return;
     }
-    setIsRoleModalOpen(true);
+
+    // For Shishya and Guru, open mandatory details modal immediately
+    const defaultName = roleId === 'LEARNER' ? 'Aniket Deshmukh' : 'Shahir Tukaram Jagtap';
+    const defaultEmail = roleId === 'LEARNER' ? 'shishya.aniket@gmail.com' : 'guru.tukaram@gmail.com';
+    const initialUser = {
+      name: defaultName,
+      role: roleId,
+      email: defaultEmail,
+      profileCompleted: false
+    };
+    setCurrentRole(roleId);
+    setCurrentUser(initialUser);
+    setPendingTargetView(targetView || (roleId === 'LEARNER' ? 'LEARNER_DASHBOARD' : 'PRACTITIONER_DASHBOARD'));
+    setIsProfileModalOpen(true);
+  };
+
+  const handleProfileComplete = (completedData) => {
+    const updatedUser = {
+      ...currentUser,
+      ...completedData,
+      profileCompleted: true
+    };
+    setCurrentUser(updatedUser);
+    setIsProfileModalOpen(false);
+
+    const destView = pendingTargetView || (updatedUser.role === 'LEARNER' ? 'LEARNER_DASHBOARD' : (updatedUser.role === 'PRACTITIONER' ? 'PRACTITIONER_DASHBOARD' : 'DASHBOARD'));
+    setActiveView(destView);
+    setPendingTargetView(null);
+
+    try {
+      localStorage.setItem('sanskriti_user', JSON.stringify(updatedUser));
+      localStorage.setItem('sanskriti_role', updatedUser.role);
+      localStorage.setItem('sanskriti_view', destView);
+    } catch (err) {
+      console.error('Failed to save updated session:', err);
+    }
   };
 
   const handleLogout = () => {
@@ -121,6 +183,7 @@ export default function App() {
       console.error('Failed to clear session:', err);
     }
     setCurrentUser(null);
+    setIsProfileModalOpen(false);
     setActiveView('LANDING'); // Show landing page first after logout
   };
 
@@ -128,7 +191,8 @@ export default function App() {
     const userObj = userData || { 
       name: roleKey === 'LEARNER' ? 'Aniket Deshmukh' : (roleKey === 'PRACTITIONER' ? 'Shahir Tukaram Jagtap' : 'Ministry Heritage Authority'), 
       role: roleKey,
-      email: roleKey === 'LEARNER' ? 'shishya.aniket@gmail.com' : (roleKey === 'PRACTITIONER' ? 'guru.tukaram@gmail.com' : 'admin.sanskriti@gov.in')
+      email: roleKey === 'LEARNER' ? 'shishya.aniket@gmail.com' : (roleKey === 'PRACTITIONER' ? 'guru.tukaram@gmail.com' : 'admin.sanskriti@gov.in'),
+      profileCompleted: true
     };
 
     const destView = targetView || (roleKey === 'LEARNER' ? 'LEARNER_DASHBOARD' : (roleKey === 'PRACTITIONER' ? 'PRACTITIONER_DASHBOARD' : 'DASHBOARD'));
@@ -266,7 +330,7 @@ export default function App() {
 
             {/* Screen 9: Practitioner Dashboard */}
             {activeView === 'PRACTITIONER_DASHBOARD' && (
-              <PractitionerDashboardView />
+              <PractitionerDashboardView currentUser={currentUser} />
             )}
 
             {/* Screen 10: Learner Dashboard */}
@@ -275,6 +339,7 @@ export default function App() {
                 onNavigateToMatching={() => handleNavigateView('MATCHING')}
                 onSelectTradition={handleSelectTradition}
                 traditions={traditions}
+                currentUser={currentUser}
               />
             )}
 
@@ -328,6 +393,7 @@ export default function App() {
             {activeView === 'SETTINGS' && (
               <SettingsProfileView
                 currentRole={currentRole}
+                currentUser={currentUser}
                 onLogout={handleLogout}
               />
             )}
@@ -348,6 +414,14 @@ export default function App() {
         isOpen={isRoleModalOpen}
         onClose={() => setIsRoleModalOpen(false)}
         onSelectRole={handleRoleSelection}
+      />
+
+      {/* Mandatory Profile Details Modal for Shishya & Guru */}
+      <ProfileDetailsModal
+        isOpen={isProfileModalOpen || (Boolean(currentUser) && (currentUser.role === 'LEARNER' || currentUser.role === 'PRACTITIONER') && !currentUser.profileCompleted)}
+        role={currentUser?.role || currentRole}
+        initialData={currentUser || {}}
+        onComplete={handleProfileComplete}
       />
 
     </div>
