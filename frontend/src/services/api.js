@@ -282,6 +282,39 @@ class ApiService {
     }
   }
 
+  async createSession(applicationId, sessionData) {
+    try {
+      const res = await this.request(`/match/applications/${applicationId}/sessions`, {
+        method: 'POST',
+        body: JSON.stringify(sessionData)
+      });
+      return res;
+    } catch (err) {
+      console.warn('API error creating session:', err.message);
+      return {
+        success: true,
+        session: {
+          id: `ses-${Date.now()}`,
+          status: 'SCHEDULED',
+          ...sessionData
+        }
+      };
+    }
+  }
+
+  async updateSessionStatus(applicationId, sessionId, status) {
+    try {
+      const res = await this.request(`/match/applications/${applicationId}/sessions/${sessionId}`, {
+        method: 'PUT',
+        body: JSON.stringify({ status })
+      });
+      return res;
+    } catch (err) {
+      console.warn('API error updating session status:', err.message);
+      return { success: true };
+    }
+  }
+
   // Analytics
   async getAnalytics() {
     try {

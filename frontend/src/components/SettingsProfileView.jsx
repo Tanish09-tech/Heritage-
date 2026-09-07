@@ -239,8 +239,8 @@ export default function SettingsProfileView({ currentRole, currentUser, onLogout
       {currentRole === 'LEARNER' && activeTab === 'PROFILE' && (
         <div className="space-y-6 animate-in fade-in">
           
-          {/* Top 3 Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Top Card */}
+          <div className="grid grid-cols-1 gap-4">
             
             {/* 1. Academic & Personal */}
             <div className="bg-white p-5 rounded-3xl border border-stone-200 shadow-xs space-y-3">
@@ -255,35 +255,6 @@ export default function SettingsProfileView({ currentRole, currentUser, onLogout
                 <div><span className="font-bold text-stone-800">State:</span> <span className="text-stone-900 font-semibold">{shishyaProfile.state}</span></div>
                 <div><span className="font-bold text-stone-800">Academic Background:</span> {shishyaProfile.education}</div>
                 <div><span className="font-bold text-stone-800">Languages:</span> {shishyaProfile.languages}</div>
-              </div>
-            </div>
-
-            {/* 2. Assigned Master & Lineage */}
-            <div className="bg-white p-5 rounded-3xl border border-stone-200 shadow-xs space-y-3">
-              <div className="flex items-center gap-2 text-xs font-bold text-stone-900">
-                <Users className="w-4 h-4 text-amber-700" />
-                <span>Assigned Master & Parampara</span>
-              </div>
-              <div className="text-xs space-y-2 text-stone-600 pt-1">
-                <div><span className="font-bold text-stone-800">Guru Name:</span> {shishyaProfile.assignedGuru.name}</div>
-                <div><span className="font-bold text-stone-800">Guru Experience:</span> {shishyaProfile.assignedGuru.experience}</div>
-                <div><span className="font-bold text-stone-800">Gurukula Kendra:</span> {shishyaProfile.assignedGuru.location}</div>
-                <div className="text-[11px] text-emerald-700 font-semibold bg-emerald-50 p-2 rounded-xl border border-emerald-200">
-                  ✓ Verified Gurukula Apprenticeship Agreement Active
-                </div>
-              </div>
-            </div>
-
-            {/* 3. Government Verification & Grant */}
-            <div className="bg-white p-5 rounded-3xl border border-stone-200 shadow-xs space-y-3">
-              <div className="flex items-center gap-2 text-xs font-bold text-stone-900">
-                <BadgeCheck className="w-4 h-4 text-indigo-700" />
-                <span>Government Accreditation & Grant</span>
-              </div>
-              <div className="text-xs space-y-2 text-stone-600 pt-1">
-                <div><span className="font-bold text-stone-800">DigiLocker Status:</span> <span className="text-emerald-700 font-semibold">{shishyaProfile.verification}</span></div>
-                <div><span className="font-bold text-stone-800">Apprentice Fellowship:</span> {shishyaProfile.stipend}</div>
-                <div><span className="font-bold text-stone-800">Apprentice Status:</span> <span className="text-stone-900 font-bold">{shishyaProfile.status}</span></div>
               </div>
             </div>
 
@@ -371,8 +342,8 @@ export default function SettingsProfileView({ currentRole, currentUser, onLogout
       {currentRole === 'PRACTITIONER' && activeTab === 'PROFILE' && (
         <div className="space-y-6 animate-in fade-in">
           
-          {/* Top 3 Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Top Card */}
+          <div className="grid grid-cols-1 gap-4">
             
             {/* 1. Lineage & Art */}
             <div className="bg-white p-5 rounded-3xl border border-stone-200 shadow-xs space-y-3">
@@ -387,33 +358,6 @@ export default function SettingsProfileView({ currentRole, currentUser, onLogout
                 <div><span className="font-bold text-stone-800">Experience:</span> <span className="text-amber-800 font-semibold">{guruProfile.experience}</span></div>
                 <div><span className="font-bold text-stone-800">Expertise / Tradition:</span> <span className="text-emerald-800 font-medium">{guruProfile.tradition}</span></div>
                 <div><span className="font-bold text-stone-800">Gharana / Lineage:</span> {guruProfile.lineage}</div>
-              </div>
-            </div>
-
-            {/* 2. Teaching & Apprenticeship */}
-            <div className="bg-white p-5 rounded-3xl border border-stone-200 shadow-xs space-y-3">
-              <div className="flex items-center gap-2 text-xs font-bold text-stone-900">
-                <Users className="w-4 h-4 text-emerald-700" />
-                <span>Knowledge Transmission Status</span>
-              </div>
-              <div className="text-xs space-y-2 text-stone-600 pt-1">
-                <div><span className="font-bold text-stone-800">Active Shishyas:</span> {guruProfile.metrics.connectedLearners} Enrolled Apprentices</div>
-                <div><span className="font-bold text-stone-800">Training Hours:</span> {guruProfile.metrics.sessionsConducted}</div>
-                <div><span className="font-bold text-stone-800">Vault Archives:</span> {guruProfile.metrics.documentationFiles}</div>
-                <div><span className="font-bold text-stone-800">Pending Review:</span> <span className="text-amber-700 font-bold">{guruProfile.metrics.pendingRequests} Requests</span></div>
-              </div>
-            </div>
-
-            {/* 3. Accreditation & Grants */}
-            <div className="bg-white p-5 rounded-3xl border border-stone-200 shadow-xs space-y-3">
-              <div className="flex items-center gap-2 text-xs font-bold text-stone-900">
-                <Award className="w-4 h-4 text-indigo-700" />
-                <span>National Accreditation & Fellowship</span>
-              </div>
-              <div className="text-xs space-y-2 text-stone-600 pt-1">
-                <div><span className="font-bold text-stone-800">Accreditation:</span> <span className="text-emerald-700 font-semibold">{guruProfile.status}</span></div>
-                <div><span className="font-bold text-stone-800">Master ID:</span> {guruProfile.verification}</div>
-                <div><span className="font-bold text-stone-800">Guru Fellowship:</span> {guruProfile.fellowship}</div>
               </div>
             </div>
 

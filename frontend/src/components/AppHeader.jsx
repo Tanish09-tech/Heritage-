@@ -29,9 +29,7 @@ export default function AppHeader({
         { id: 'EXPLORER', label: '3. Traditions Explorer' },
         { id: 'TRADITION_DETAIL', label: '4. Tradition Details' },
         { id: 'MAP', label: '5. Heritage Map' },
-        { id: 'AI_ANALYSIS', label: '6. AI Heritage Insights' },
-        { id: 'RECOMMENDATIONS', label: '7. Learning Recommendations' },
-        { id: 'SETTINGS', label: '8. Profile & Settings' },
+        { id: 'SETTINGS', label: '6. Profile & Settings' },
       ];
     }
 
@@ -43,8 +41,7 @@ export default function AppHeader({
         { id: 'ADD_TRADITION', label: '4. Add / Register Tradition' },
         { id: 'DOCUMENTATION', label: '5. Knowledge Documentation Vault' },
         { id: 'MAP', label: '6. Heritage Map' },
-        { id: 'RECOMMENDATIONS', label: '7. Heritage Interventions' },
-        { id: 'SETTINGS', label: '8. Profile & Settings' },
+        { id: 'SETTINGS', label: '7. Profile & Settings' },
       ];
     }
 

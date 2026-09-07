@@ -405,8 +405,8 @@ export default function App() {
               />
             )}
 
-            {/* Screen 12: AI Heritage Analysis */}
-            {activeView === 'AI_ANALYSIS' && (
+            {/* Screen 12: AI Heritage Analysis (Admin Only) */}
+            {activeView === 'AI_ANALYSIS' && currentRole === 'AUTHORITY' && (
               <AiAnalysisView
                 traditions={traditions}
                 onUpdateTraditionScore={() => {}}
@@ -443,15 +443,12 @@ export default function App() {
               />
             )}
 
-            {/* Supporting View: Recommendations */}
+            {/* Supporting View: Recommendations -> Direct Guru-Shishya Matchmaker */}
             {activeView === 'RECOMMENDATIONS' && (
-              <RecommendationEngineView
+              <MasterMatchingView
+                onSelectTradition={handleSelectTradition}
                 traditions={traditions}
-                onNavigateTab={(tab) => {
-                  if (tab === 'MATCHMAKER') handleNavigateView('MATCHING');
-                  else if (tab === 'HTHS') handleNavigateView('AI_ANALYSIS');
-                  else handleNavigateView('DASHBOARD');
-                }}
+                currentUser={currentUser}
               />
             )}
 

@@ -174,4 +174,91 @@ router.post('/applications/:id/messages', (req, res) => {
   }
 });
 
+// POST /api/match/applications/:id/sessions - Schedule/Start a new learning session
+router.post('/applications/:id/sessions', (req, res) => {
+  try {
+    const app = db.getById('applications', req.params.id);
+    if (!app) {
+      return res.status(404).json({ error: 'Application not found' });
+    }
+
+    const { title, date, time, mode, notes } = req.body;
+    if (!title || !title.trim()) {
+      return res.status(400).json({ error: 'Session title is required.' });
+    }
+
+    const newSession = {
+      id: `ses-${Date.now()}`,
+      title: title.trim(),
+      date: date || new Date().toISOString().split('T')[0],
+      time: time || '10:00 AM',
+      mode: mode || 'Gurukul Offline Residency',
+      notes: notes || '',
+      status: 'SCHEDULED',
+      createdAt: new Date().toISOString()
+    };
+
+    const sessions = app.sessions || [];
+    sessions.push(newSession);
+
+    // Also add automated message to chat history
+    const systemMsg = {
+      id: `msg-sys-${Date.now()}`,
+      sender: 'Sanskriti System',
+      senderRole: 'SYSTEM',
+      text: `📅 New Gurukul Learning Session Scheduled: "${newSession.title}" on ${newSession.date} at ${newSession.time} (${newSession.mode}).`,
+      timestamp: new Date().toISOString()
+    };
+
+    const messages = app.messages || [];
+    messages.push(systemMsg);
+
+    const updated = db.update('applications', req.params.id, {
+      sessions,
+      messages,
+      lastSessionAt: new Date().toISOString()
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: 'Learning session scheduled successfully',
+      session: newSession,
+      application: updated
+    });
+  } catch (err) {
+    console.error('Error creating session:', err);
+    return res.status(500).json({ error: 'Failed to create session' });
+  }
+});
+
+// PUT /api/match/applications/:id/sessions/:sessionId - Update session status
+router.put('/applications/:id/sessions/:sessionId', (req, res) => {
+  try {
+    const app = db.getById('applications', req.params.id);
+    if (!app) {
+      return res.status(404).json({ error: 'Application not found' });
+    }
+
+    const { status } = req.body; // 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED'
+    const sessions = app.sessions || [];
+    const session = sessions.find(s => s.id === req.params.sessionId);
+
+    if (session) {
+      session.status = status;
+      session.updatedAt = new Date().toISOString();
+    }
+
+    const updated = db.update('applications', req.params.id, { sessions });
+
+    return res.json({
+      success: true,
+      message: `Session status updated to ${status}`,
+      application: updated
+    });
+  } catch (err) {
+    console.error('Error updating session status:', err);
+    return res.status(500).json({ error: 'Failed to update session' });
+  }
+});
+
 export default router;

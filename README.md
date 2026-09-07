@@ -61,14 +61,29 @@ Open `http://localhost:5174/` in your browser.
 
 ## 🔐 Fixed Demo Test Credentials
 
-The backend includes 5 pre-seeded fixed demo accounts for instant testing, accessible via 1-click quick preset chips on the login screen.
+The backend includes 11 pre-seeded fixed demo accounts (5 Gurus, 5 Students, and 1 Admin) for instant testing, accessible via 1-click quick preset chips on the login screen.
 
 > ⚠️ **Backend Registration Rule**: New users (Shishyas & Gurus) **must register first** with mandatory profile details (Name, DOB, State, Hobbies / Experience / Expertise) before logging in. The backend strictly blocks login attempts for unregistered emails with HTTP 401.
 
+### 🎓 5 Student (Shishya) Credentials
 | Role | Name | Email | Password | Pre-filled Mandatory Profile Details |
 | :--- | :--- | :--- | :--- | :--- |
 | **Shishya 1** | Aniket Deshmukh | `shishya1@sanskriti.gov.in` | `password123` | **DOB**: `2002-05-15`, **State**: `Maharashtra`<br/>**Hobbies**: `Shahiri Powada recitation, Daf percussion, Historical Maratha Ballads` |
 | **Shishya 2** | Simran Kaur | `shishya2@sanskriti.gov.in` | `password123` | **DOB**: `2003-11-20`, **State**: `Punjab`<br/>**Hobbies**: `Phulkari folk embroidery, Giddha folk dance, Punjabi folk music` |
+| **Shishya 3** | Aarav Patel | `shishya3@sanskriti.gov.in` | `password123` | **DOB**: `2001-09-10`, **State**: `Gujarat`<br/>**Hobbies**: `Bhavai vesha acting, Garba drumming, Kutchi embroidery` |
+| **Shishya 4** | Meera Menon | `shishya4@sanskriti.gov.in` | `password123` | **DOB**: `2004-03-08`, **State**: `Kerala`<br/>**Hobbies**: `Koodiyattam facial expressions, Mizhavu drumming, Mohiniyattam` |
+| **Shishya 5** | Bishal Saikia | `shishya5@sanskriti.gov.in` | `password123` | **DOB**: `2002-12-14`, **State**: `Assam`<br/>**Hobbies**: `Bihu Dhol playing, Pepa flute, Assamese oral legends` |
+
+### 🧘 5 Master (Guru) Credentials
+| Role | Name | Email | Password | Pre-filled Mandatory Profile Details |
+| :--- | :--- | :--- | :--- | :--- |
 | **Guru 1** | Shahir Tukaram Jagtap | `guru1@sanskriti.gov.in` | `password123` | **State**: `Maharashtra`, **DOB**: `1968-08-20`<br/>**Experience**: `28 Years of continuous Shahiri Akhada & Daf oral tradition`<br/>**Expertise**: `Shahiri Powada (Oral Ballads)` |
 | **Guru 2** | Ustad Harinder Singh | `guru2@sanskriti.gov.in` | `password123` | **State**: `Punjab`, **DOB**: `1965-03-12`<br/>**Experience**: `32 Years of traditional Gatka Shastar Vidiya & folk rhythms`<br/>**Expertise**: `Baisakhi & Gatka Martial Art` |
-| **Admin** | Dr. Rajesh Sharma | `admin@sanskriti.gov.in` | `adminpassword123` | **Role**: `AUTHORITY`, **State**: `Delhi` |
+| **Guru 3** | Pandit Raghunath Joshi | `guru3@sanskriti.gov.in` | `password123` | **State**: `Gujarat`, **DOB**: `1970-11-05`<br/>**Experience**: `25 Years of Bhavai Folk Theatre & Garba compositions`<br/>**Expertise**: `Bhavai Folk Theatre` |
+| **Guru 4** | Guru Manikandan Nair | `guru4@sanskriti.gov.in` | `password123` | **State**: `Kerala`, **DOB**: `1967-04-18`<br/>**Experience**: `30 Years of Koodiyattam Sanskrit Theatre & Mudras`<br/>**Expertise**: `Koodiyattam Sanskrit Theatre` |
+| **Guru 5** | Shrimati Hemlata Gogoi | `guru5@sanskriti.gov.in` | `password123` | **State**: `Assam`, **DOB**: `1972-09-25`<br/>**Experience**: `22 Years of Bihu Folk Dance & Muga Silk Weaving`<br/>**Expertise**: `Rongali Bihu & Folk Instruments` |
+
+### 🏛️ 1 Admin Credential
+| Role | Name | Email | Password | Pre-filled Mandatory Profile Details |
+| :--- | :--- | :--- | :--- | :--- |
+| **Admin** | Dr. Rajesh Sharma | `admin@sanskriti.gov.in` | `adminpassword123` | **Role**: `AUTHORITY`, **State**: `Delhi`<br/>**Designation**: `Director of Living Heritage, Ministry of Culture` |

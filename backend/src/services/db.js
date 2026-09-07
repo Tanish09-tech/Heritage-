@@ -33,7 +33,7 @@ class JSONDatabase {
           validationQueue: VALIDATION_QUEUE || [],
           knowledgeVault: ARCHIVED_KNOWLEDGE_ITEMS || [],
           users: [
-            // 1. Shishya 1 (Fixed Credentials)
+            // 1. Shishya 1
             {
               id: 'user-shishya-01',
               email: 'shishya1@sanskriti.gov.in',
@@ -46,7 +46,7 @@ class JSONDatabase {
               profileCompleted: true,
               createdAt: new Date().toISOString()
             },
-            // 2. Shishya 2 (Fixed Credentials)
+            // 2. Shishya 2
             {
               id: 'user-shishya-02',
               email: 'shishya2@sanskriti.gov.in',
@@ -59,7 +59,46 @@ class JSONDatabase {
               profileCompleted: true,
               createdAt: new Date().toISOString()
             },
-            // 3. Guru 1 (Fixed Credentials)
+            // 3. Shishya 3
+            {
+              id: 'user-shishya-03',
+              email: 'shishya3@sanskriti.gov.in',
+              password: 'password123',
+              name: 'Aarav Patel',
+              role: 'LEARNER',
+              dob: '2001-09-10',
+              hobbies: 'Bhavai vesha acting, Garba drumming, Kutchi embroidery',
+              state: 'Gujarat',
+              profileCompleted: true,
+              createdAt: new Date().toISOString()
+            },
+            // 4. Shishya 4
+            {
+              id: 'user-shishya-04',
+              email: 'shishya4@sanskriti.gov.in',
+              password: 'password123',
+              name: 'Meera Menon',
+              role: 'LEARNER',
+              dob: '2004-03-08',
+              hobbies: 'Koodiyattam facial expressions, Mizhavu drumming, Mohiniyattam',
+              state: 'Kerala',
+              profileCompleted: true,
+              createdAt: new Date().toISOString()
+            },
+            // 5. Shishya 5
+            {
+              id: 'user-shishya-05',
+              email: 'shishya5@sanskriti.gov.in',
+              password: 'password123',
+              name: 'Bishal Saikia',
+              role: 'LEARNER',
+              dob: '2002-12-14',
+              hobbies: 'Bihu Dhol playing, Pepa flute, Assamese oral legends',
+              state: 'Assam',
+              profileCompleted: true,
+              createdAt: new Date().toISOString()
+            },
+            // 6. Guru 1
             {
               id: 'user-guru-01',
               email: 'guru1@sanskriti.gov.in',
@@ -73,7 +112,7 @@ class JSONDatabase {
               profileCompleted: true,
               createdAt: new Date().toISOString()
             },
-            // 4. Guru 2 (Fixed Credentials)
+            // 7. Guru 2
             {
               id: 'user-guru-02',
               email: 'guru2@sanskriti.gov.in',
@@ -87,7 +126,49 @@ class JSONDatabase {
               profileCompleted: true,
               createdAt: new Date().toISOString()
             },
-            // 5. Admin (Fixed Credentials)
+            // 8. Guru 3
+            {
+              id: 'user-guru-03',
+              email: 'guru3@sanskriti.gov.in',
+              password: 'password123',
+              name: 'Pandit Raghunath Joshi',
+              role: 'PRACTITIONER',
+              dob: '1970-11-05',
+              state: 'Gujarat',
+              experience: '25 Years of Bhavai Folk Theatre & Garba compositions',
+              expertTradition: 'Bhavai Folk Theatre',
+              profileCompleted: true,
+              createdAt: new Date().toISOString()
+            },
+            // 9. Guru 4
+            {
+              id: 'user-guru-04',
+              email: 'guru4@sanskriti.gov.in',
+              password: 'password123',
+              name: 'Guru Manikandan Nair',
+              role: 'PRACTITIONER',
+              dob: '1967-04-18',
+              state: 'Kerala',
+              experience: '30 Years of Koodiyattam Sanskrit Theatre & Mudras',
+              expertTradition: 'Koodiyattam Sanskrit Theatre',
+              profileCompleted: true,
+              createdAt: new Date().toISOString()
+            },
+            // 10. Guru 5
+            {
+              id: 'user-guru-05',
+              email: 'guru5@sanskriti.gov.in',
+              password: 'password123',
+              name: 'Shrimati Hemlata Gogoi',
+              role: 'PRACTITIONER',
+              dob: '1972-09-25',
+              state: 'Assam',
+              experience: '22 Years of Bihu Folk Dance & Muga Silk Weaving',
+              expertTradition: 'Rongali Bihu & Folk Instruments',
+              profileCompleted: true,
+              createdAt: new Date().toISOString()
+            },
+            // 11. Admin
             {
               id: 'user-admin-01',
               email: 'admin@sanskriti.gov.in',
@@ -97,41 +178,6 @@ class JSONDatabase {
               state: 'Delhi',
               designation: 'Director of Living Heritage, Ministry of Culture',
               clearance: 'National Level-4 Cultural Administrator',
-              profileCompleted: true,
-              createdAt: new Date().toISOString()
-            },
-            // Backward-compatible alias accounts
-            {
-              id: 'user-shishya-alias',
-              email: 'shishya.aniket@gmail.com',
-              password: 'password123',
-              name: 'Aniket Deshmukh',
-              role: 'LEARNER',
-              dob: '2002-05-15',
-              hobbies: 'Shahiri Powada recitation, Daf percussion, Historical Maratha Ballads',
-              state: 'Maharashtra',
-              profileCompleted: true,
-              createdAt: new Date().toISOString()
-            },
-            {
-              id: 'user-guru-alias',
-              email: 'guru.tukaram@gmail.com',
-              password: 'password123',
-              name: 'Shahir Tukaram Jagtap',
-              role: 'PRACTITIONER',
-              dob: '1968-08-20',
-              state: 'Maharashtra',
-              experience: '28 Years of continuous Shahiri Akhada & Daf oral tradition',
-              expertTradition: 'Shahiri Powada (Oral Ballads)',
-              profileCompleted: true,
-              createdAt: new Date().toISOString()
-            },
-            {
-              id: 'user-admin-alias',
-              email: 'admin.sanskriti@gov.in',
-              password: 'adminpassword123',
-              name: 'Ministry Heritage Authority',
-              role: 'AUTHORITY',
               profileCompleted: true,
               createdAt: new Date().toISOString()
             }
@@ -169,7 +215,7 @@ class JSONDatabase {
 
   ensureFixedUsers() {
     const fixedUsers = [
-      // 1. Shishya 1 (Fixed Credentials)
+      // 1. Shishya 1
       {
         id: 'user-shishya-01',
         email: 'shishya1@sanskriti.gov.in',
@@ -182,7 +228,7 @@ class JSONDatabase {
         profileCompleted: true,
         createdAt: new Date().toISOString()
       },
-      // 2. Shishya 2 (Fixed Credentials)
+      // 2. Shishya 2
       {
         id: 'user-shishya-02',
         email: 'shishya2@sanskriti.gov.in',
@@ -195,7 +241,46 @@ class JSONDatabase {
         profileCompleted: true,
         createdAt: new Date().toISOString()
       },
-      // 3. Guru 1 (Fixed Credentials)
+      // 3. Shishya 3
+      {
+        id: 'user-shishya-03',
+        email: 'shishya3@sanskriti.gov.in',
+        password: 'password123',
+        name: 'Aarav Patel',
+        role: 'LEARNER',
+        dob: '2001-09-10',
+        hobbies: 'Bhavai vesha acting, Garba drumming, Kutchi embroidery',
+        state: 'Gujarat',
+        profileCompleted: true,
+        createdAt: new Date().toISOString()
+      },
+      // 4. Shishya 4
+      {
+        id: 'user-shishya-04',
+        email: 'shishya4@sanskriti.gov.in',
+        password: 'password123',
+        name: 'Meera Menon',
+        role: 'LEARNER',
+        dob: '2004-03-08',
+        hobbies: 'Koodiyattam facial expressions, Mizhavu drumming, Mohiniyattam',
+        state: 'Kerala',
+        profileCompleted: true,
+        createdAt: new Date().toISOString()
+      },
+      // 5. Shishya 5
+      {
+        id: 'user-shishya-05',
+        email: 'shishya5@sanskriti.gov.in',
+        password: 'password123',
+        name: 'Bishal Saikia',
+        role: 'LEARNER',
+        dob: '2002-12-14',
+        hobbies: 'Bihu Dhol playing, Pepa flute, Assamese oral legends',
+        state: 'Assam',
+        profileCompleted: true,
+        createdAt: new Date().toISOString()
+      },
+      // 6. Guru 1
       {
         id: 'user-guru-01',
         email: 'guru1@sanskriti.gov.in',
@@ -209,7 +294,7 @@ class JSONDatabase {
         profileCompleted: true,
         createdAt: new Date().toISOString()
       },
-      // 4. Guru 2 (Fixed Credentials)
+      // 7. Guru 2
       {
         id: 'user-guru-02',
         email: 'guru2@sanskriti.gov.in',
@@ -223,7 +308,49 @@ class JSONDatabase {
         profileCompleted: true,
         createdAt: new Date().toISOString()
       },
-      // 5. Admin (Fixed Credentials)
+      // 8. Guru 3
+      {
+        id: 'user-guru-03',
+        email: 'guru3@sanskriti.gov.in',
+        password: 'password123',
+        name: 'Pandit Raghunath Joshi',
+        role: 'PRACTITIONER',
+        dob: '1970-11-05',
+        state: 'Gujarat',
+        experience: '25 Years of Bhavai Folk Theatre & Garba compositions',
+        expertTradition: 'Bhavai Folk Theatre',
+        profileCompleted: true,
+        createdAt: new Date().toISOString()
+      },
+      // 9. Guru 4
+      {
+        id: 'user-guru-04',
+        email: 'guru4@sanskriti.gov.in',
+        password: 'password123',
+        name: 'Guru Manikandan Nair',
+        role: 'PRACTITIONER',
+        dob: '1967-04-18',
+        state: 'Kerala',
+        experience: '30 Years of Koodiyattam Sanskrit Theatre & Mudras',
+        expertTradition: 'Koodiyattam Sanskrit Theatre',
+        profileCompleted: true,
+        createdAt: new Date().toISOString()
+      },
+      // 10. Guru 5
+      {
+        id: 'user-guru-05',
+        email: 'guru5@sanskriti.gov.in',
+        password: 'password123',
+        name: 'Shrimati Hemlata Gogoi',
+        role: 'PRACTITIONER',
+        dob: '1972-09-25',
+        state: 'Assam',
+        experience: '22 Years of Bihu Folk Dance & Muga Silk Weaving',
+        expertTradition: 'Rongali Bihu & Folk Instruments',
+        profileCompleted: true,
+        createdAt: new Date().toISOString()
+      },
+      // 11. Admin
       {
         id: 'user-admin-01',
         email: 'admin@sanskriti.gov.in',

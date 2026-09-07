@@ -41,11 +41,14 @@ export default function PractitionerDashboardView({ currentUser }) {
 
   const fetchLearnerRequests = async () => {
     try {
-      const apps = await api.getApplications({ practitionerId: practitioner.name });
-      if (apps.length > 0) {
-        setRequests(apps);
+      const apps = await api.getApplications();
+      if (apps && apps.length > 0) {
+        const filtered = apps.filter(a => 
+          a.practitionerName?.toLowerCase().includes(practitioner.name.toLowerCase()) || 
+          a.practitionerId === practitioner.id
+        );
+        setRequests(filtered.length > 0 ? filtered : apps);
       } else {
-        // Fallback demo request
         setRequests([
           {
             id: 'app-demo-01',
@@ -53,7 +56,7 @@ export default function PractitionerDashboardView({ currentUser }) {
             learnerName: 'Aniket Deshmukh',
             practitionerName: practitioner.name,
             tradition: practitioner.tradition,
-            note: 'Respected Guru ji, I wish to learn the traditional rhythms and ballads of Shahiri Powada.',
+            note: 'Respected Guru ji, I wish to learn the traditional rhythms and ballads of Shahiri Powada under your guidance.',
             status: 'PENDING',
             submittedAt: new Date().toISOString()
           }

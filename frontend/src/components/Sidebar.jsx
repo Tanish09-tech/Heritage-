@@ -25,10 +25,9 @@ export default function Sidebar({ activeView, setActiveView, onLogout, currentRo
     if (currentRole === 'LEARNER') {
       return [
         { id: 'LEARNER_DASHBOARD', label: t('shishyaPortal'), icon: GraduationCap },
+        { id: 'MATCHING', label: t('matchmaker'), icon: Users },
         { id: 'MAP', label: t('map'), icon: MapPin },
         { id: 'EXPLORER', label: t('explorer'), icon: BookOpen },
-        { id: 'AI_ANALYSIS', label: t('aiInsights'), icon: Activity },
-        { id: 'RECOMMENDATIONS', label: t('matchmaker'), icon: Lightbulb },
         { id: 'SETTINGS', label: t('settings'), icon: Settings },
       ];
     }
@@ -40,7 +39,6 @@ export default function Sidebar({ activeView, setActiveView, onLogout, currentRo
         { id: 'MAP', label: t('map'), icon: MapPin },
         { id: 'EXPLORER', label: t('explorer'), icon: BookOpen },
         { id: 'DOCUMENTATION', label: t('knowledgeVault'), icon: FileText },
-        { id: 'RECOMMENDATIONS', label: t('aiInsights'), icon: Lightbulb },
         { id: 'SETTINGS', label: t('settings'), icon: Settings },
       ];
     }
@@ -48,12 +46,12 @@ export default function Sidebar({ activeView, setActiveView, onLogout, currentRo
     // 3. Admin (Authority) Role: NO Guru Portal, NO Shishya Portal
     return [
       { id: 'DASHBOARD', label: t('adminPortal'), icon: LayoutDashboard },
+      { id: 'MATCHING', label: t('matchmaker'), icon: Users },
       { id: 'MAP', label: t('map'), icon: MapPin },
       { id: 'EXPLORER', label: t('explorer'), icon: BookOpen },
       { id: 'AI_ANALYSIS', label: t('aiInsights'), icon: Activity },
       { id: 'DOCUMENTATION', label: t('knowledgeVault'), icon: FileText },
       { id: 'VALIDATION', label: t('validationQueue'), icon: ShieldCheck },
-      { id: 'RECOMMENDATIONS', label: t('aiInsights'), icon: Lightbulb },
       { id: 'SETTINGS', label: t('settings'), icon: Settings },
     ];
   };

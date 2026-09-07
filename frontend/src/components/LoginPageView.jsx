@@ -41,6 +41,36 @@ export const FIXED_CREDENTIALS = [
     hobbies: 'Phulkari folk embroidery, Giddha folk dance, Punjabi folk music'
   },
   {
+    roleId: 'SHISHYA',
+    label: 'Shishya 3 (Aarav)',
+    email: 'shishya3@sanskriti.gov.in',
+    password: 'password123',
+    name: 'Aarav Patel',
+    state: 'Gujarat',
+    dob: '2001-09-10',
+    hobbies: 'Bhavai vesha acting, Garba drumming, Kutchi embroidery'
+  },
+  {
+    roleId: 'SHISHYA',
+    label: 'Shishya 4 (Meera)',
+    email: 'shishya4@sanskriti.gov.in',
+    password: 'password123',
+    name: 'Meera Menon',
+    state: 'Kerala',
+    dob: '2004-03-08',
+    hobbies: 'Koodiyattam facial expressions, Mizhavu drumming, Mohiniyattam'
+  },
+  {
+    roleId: 'SHISHYA',
+    label: 'Shishya 5 (Bishal)',
+    email: 'shishya5@sanskriti.gov.in',
+    password: 'password123',
+    name: 'Bishal Saikia',
+    state: 'Assam',
+    dob: '2002-12-14',
+    hobbies: 'Bihu Dhol playing, Pepa flute, Assamese oral legends'
+  },
+  {
     roleId: 'GURU',
     label: 'Guru 1 (Tukaram)',
     email: 'guru1@sanskriti.gov.in',
@@ -63,6 +93,39 @@ export const FIXED_CREDENTIALS = [
     expertTradition: 'Baisakhi & Gatka Martial Art'
   },
   {
+    roleId: 'GURU',
+    label: 'Guru 3 (Raghunath)',
+    email: 'guru3@sanskriti.gov.in',
+    password: 'password123',
+    name: 'Pandit Raghunath Joshi',
+    state: 'Gujarat',
+    dob: '1970-11-05',
+    experience: '25 Years of Bhavai Folk Theatre & Garba compositions',
+    expertTradition: 'Bhavai Folk Theatre'
+  },
+  {
+    roleId: 'GURU',
+    label: 'Guru 4 (Manikandan)',
+    email: 'guru4@sanskriti.gov.in',
+    password: 'password123',
+    name: 'Guru Manikandan Nair',
+    state: 'Kerala',
+    dob: '1967-04-18',
+    experience: '30 Years of Koodiyattam Sanskrit Theatre & Mudras',
+    expertTradition: 'Koodiyattam Sanskrit Theatre'
+  },
+  {
+    roleId: 'GURU',
+    label: 'Guru 5 (Hemlata)',
+    email: 'guru5@sanskriti.gov.in',
+    password: 'password123',
+    name: 'Shrimati Hemlata Gogoi',
+    state: 'Assam',
+    dob: '1972-09-25',
+    experience: '22 Years of Bihu Folk Dance & Muga Silk Weaving',
+    expertTradition: 'Rongali Bihu & Folk Instruments'
+  },
+  {
     roleId: 'ADMIN',
     label: 'Admin (Dr. Rajesh)',
     email: 'admin@sanskriti.gov.in',
@@ -83,19 +146,19 @@ export default function LoginPageView({ onLoginSuccess, onBackToLanding }) {
   const [selectedRole, setSelectedRole] = useState('SHISHYA');
 
   // Credentials form states
-  const [email, setEmail] = useState('shishya.aniket@gmail.com');
+  const [email, setEmail] = useState('shishya1@sanskriti.gov.in');
   const [password, setPassword] = useState('password123');
-  const [fullName, setFullName] = useState('');
+  const [fullName, setFullName] = useState('Aniket Deshmukh');
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   // Mandatory Profile Details States
   const [detailFullName, setDetailFullName] = useState('Aniket Deshmukh');
-  const [dob, setDob] = useState('');
+  const [dob, setDob] = useState('2002-05-15');
   const [state, setState] = useState('Maharashtra');
-  const [hobbies, setHobbies] = useState('');
+  const [hobbies, setHobbies] = useState('Shahiri Powada recitation, Daf percussion, Historical Maratha Ballads');
   const [experience, setExperience] = useState('');
-  const [expertTradition, setExpertTradition] = useState('Paithani & Nauvari Weaving');
+  const [expertTradition, setExpertTradition] = useState('Shahiri Powada (Oral Ballads)');
 
   // Mandatory ID Proof States (Aadhaar, PAN, Voter ID, Passport)
   const [idType, setIdType] = useState('Aadhaar Card');
@@ -115,7 +178,7 @@ export default function LoginPageView({ onLoginSuccess, onBackToLanding }) {
       title: 'Shishya',
       sanskrit: 'शिष्य',
       subtitle: 'Learner & Disciple',
-      email: 'shishya.aniket@gmail.com',
+      email: 'shishya1@sanskriti.gov.in',
       name: 'Aniket Deshmukh',
       icon: GraduationCap,
       activeColor: 'bg-[#104333] text-white border-[#104333]',
@@ -129,7 +192,7 @@ export default function LoginPageView({ onLoginSuccess, onBackToLanding }) {
       title: 'Guru',
       sanskrit: 'गुरु',
       subtitle: 'Master & Custodian',
-      email: 'guru.tukaram@gmail.com',
+      email: 'guru1@sanskriti.gov.in',
       name: 'Shahir Tukaram Jagtap',
       icon: Users,
       activeColor: 'bg-[#845314] text-white border-[#845314]',
@@ -143,8 +206,8 @@ export default function LoginPageView({ onLoginSuccess, onBackToLanding }) {
       title: 'Admin',
       sanskrit: 'प्रशासक',
       subtitle: 'Heritage Authority',
-      email: 'admin.sanskriti@gov.in',
-      name: 'Ministry Heritage Authority',
+      email: 'admin@sanskriti.gov.in',
+      name: 'Dr. Rajesh Sharma',
       icon: ShieldCheck,
       activeColor: 'bg-[#1e3a68] text-white border-[#1e3a68]',
       inactiveColor: 'bg-white/80 text-stone-700 border-stone-200 hover:border-indigo-600 hover:bg-indigo-50/50'
@@ -153,8 +216,18 @@ export default function LoginPageView({ onLoginSuccess, onBackToLanding }) {
 
   const handleRoleChange = (roleId) => {
     setSelectedRole(roleId);
-    setEmail(roleData[roleId].email);
-    setDetailFullName(fullName || roleData[roleId].name);
+    const defaultPreset = FIXED_CREDENTIALS.find(c => c.roleId === roleId);
+    if (defaultPreset) {
+      setEmail(defaultPreset.email);
+      setPassword(defaultPreset.password);
+      setFullName(defaultPreset.name);
+      setDetailFullName(defaultPreset.name);
+      if (defaultPreset.dob) setDob(defaultPreset.dob);
+      if (defaultPreset.state) setState(defaultPreset.state);
+      if (defaultPreset.hobbies) setHobbies(defaultPreset.hobbies);
+      if (defaultPreset.experience) setExperience(defaultPreset.experience);
+      if (defaultPreset.expertTradition) setExpertTradition(defaultPreset.expertTradition);
+    }
     setErrorMsg('');
   };
 
