@@ -3496,7 +3496,7 @@
       "password": "password123",
       "name": "Aniket Deshmukh",
       "role": "LEARNER",
-      "dob": "2026-09-01T18:30:00.000Z",
+      "dob": "2002-05-13T18:30:00.000Z",
       "hobbies": "Shahiri Powada recitation, Daf percussion, Historical Maratha Ballads",
       "state": "Maharashtra",
       "profileCompleted": true,
@@ -3505,7 +3505,7 @@
       "expert_tradition": null,
       "profile_completed": true,
       "created_at": "2026-09-05T16:40:29.153Z",
-      "updated_at": "2026-09-07T06:15:08.454Z"
+      "updated_at": "2026-09-07T06:19:54.506Z"
     },
     {
       "id": "user-shishya-1",

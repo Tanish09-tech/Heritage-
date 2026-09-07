@@ -464,6 +464,7 @@ export default function App() {
                     setArchivedItems(prev => [item, ...prev]);
                   }
                 }}
+                currentUser={currentUser}
               />
             )}
 
