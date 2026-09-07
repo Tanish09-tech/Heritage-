@@ -51,14 +51,17 @@ export default function App() {
 
   const [activeView, setActiveView] = useState(() => {
     try {
-      const savedUser = localStorage.getItem('sanskriti_user');
+      const savedUserStr = localStorage.getItem('sanskriti_user');
       const savedRole = localStorage.getItem('sanskriti_role');
       const savedView = localStorage.getItem('sanskriti_view');
-      if (savedUser) {
-        if (savedView && savedView !== 'LANDING' && savedView !== 'LOGIN') return savedView;
-        if (savedRole === 'LEARNER') return 'LEARNER_DASHBOARD';
-        if (savedRole === 'PRACTITIONER') return 'PRACTITIONER_DASHBOARD';
-        return 'DASHBOARD';
+      if (savedUserStr) {
+        const savedUser = JSON.parse(savedUserStr);
+        if (savedUser) {
+          if (savedView && savedView !== 'LANDING' && savedView !== 'LOGIN') return savedView;
+          if (savedRole === 'LEARNER' || savedUser.role === 'LEARNER') return 'LEARNER_DASHBOARD';
+          if (savedRole === 'PRACTITIONER' || savedUser.role === 'PRACTITIONER') return 'PRACTITIONER_DASHBOARD';
+          return 'DASHBOARD';
+        }
       }
       return 'LANDING';
     } catch {
@@ -148,15 +151,14 @@ export default function App() {
     // Check if user already has completed details for this role
     if (currentUser && currentUser.role === roleId && currentUser.profileCompleted) {
       setCurrentRole(roleId);
-      if (targetView) handleNavigateView(targetView);
+      handleNavigateView(targetView || (roleId === 'LEARNER' ? 'LEARNER_DASHBOARD' : 'PRACTITIONER_DASHBOARD'));
       return;
     }
 
     // Shishya or Guru requires mandatory details to be filled before accessing dashboard!
-    const defaultName = roleId === 'LEARNER' ? 'Aniket Deshmukh' : 'Shahir Tukaram Jagtap';
-    const defaultEmail = roleId === 'LEARNER' ? 'shishya.aniket@gmail.com' : 'guru.tukaram@gmail.com';
+    const defaultEmail = roleId === 'LEARNER' ? 'shishya1@sanskriti.gov.in' : 'guru1@sanskriti.gov.in';
     const newUser = {
-      name: (currentUser?.role === roleId ? currentUser?.name : '') || defaultName,
+      name: roleId === 'LEARNER' ? 'Aniket Deshmukh' : 'Shahir Tukaram Jagtap',
       role: roleId,
       email: (currentUser?.role === roleId ? currentUser?.email : '') || defaultEmail,
       profileCompleted: false
@@ -181,7 +183,7 @@ export default function App() {
 
     // For Shishya and Guru, open mandatory details modal immediately
     const defaultName = roleId === 'LEARNER' ? 'Aniket Deshmukh' : 'Shahir Tukaram Jagtap';
-    const defaultEmail = roleId === 'LEARNER' ? 'shishya.aniket@gmail.com' : 'guru.tukaram@gmail.com';
+    const defaultEmail = roleId === 'LEARNER' ? 'shishya1@sanskriti.gov.in' : 'guru1@sanskriti.gov.in';
     const initialUser = {
       name: defaultName,
       role: roleId,
@@ -237,9 +239,9 @@ export default function App() {
 
   const handleLoginSuccess = (roleKey, targetView, userData) => {
     const userObj = userData || { 
-      name: roleKey === 'LEARNER' ? 'Aniket Deshmukh' : (roleKey === 'PRACTITIONER' ? 'Shahir Tukaram Jagtap' : 'Ministry Heritage Authority'), 
+      name: roleKey === 'LEARNER' ? 'Aniket Deshmukh' : (roleKey === 'PRACTITIONER' ? 'Shahir Tukaram Jagtap' : 'Dr. Rajesh Sharma'), 
       role: roleKey,
-      email: roleKey === 'LEARNER' ? 'shishya.aniket@gmail.com' : (roleKey === 'PRACTITIONER' ? 'guru.tukaram@gmail.com' : 'admin.sanskriti@gov.in'),
+      email: roleKey === 'LEARNER' ? 'shishya1@sanskriti.gov.in' : (roleKey === 'PRACTITIONER' ? 'guru1@sanskriti.gov.in' : 'admin@sanskriti.gov.in'),
       profileCompleted: true
     };
 
@@ -254,7 +256,7 @@ export default function App() {
     setCurrentUser(userObj);
     setActiveView(destView);
 
-    // Save session in localStorage so user doesn't get automatically logged out
+    // Save session in localStorage so user doesn't get automatically logged out or asked for login again
     try {
       localStorage.setItem('sanskriti_user', JSON.stringify(userObj));
       localStorage.setItem('sanskriti_role', roleKey);
@@ -264,19 +266,28 @@ export default function App() {
     }
   };
 
+  const handleLandingAction = () => {
+    if (currentUser) {
+      const destView = currentRole === 'LEARNER' ? 'LEARNER_DASHBOARD' : (currentRole === 'PRACTITIONER' ? 'PRACTITIONER_DASHBOARD' : 'DASHBOARD');
+      setActiveView(destView);
+    } else {
+      setActiveView('LOGIN');
+    }
+  };
+
   // Screen 1: Landing Page
   if (activeView === 'LANDING') {
     return (
       <div className="relative min-h-screen bg-[#0d0d0d] font-sans">
         <LandingPageView
-          onExploreHeritage={() => setActiveView('LOGIN')}
-          onOpenDashboard={() => setActiveView('LOGIN')}
-          onOpenPractitioners={() => setActiveView('LOGIN')}
-          onOpenLearn={() => setActiveView('LOGIN')}
-          onOpenAiAnalysis={() => setActiveView('LOGIN')}
-          onOpenDocumentation={() => setActiveView('LOGIN')}
-          onOpenLogin={() => setActiveView('LOGIN')}
-          onJoinMission={() => setActiveView('LOGIN')}
+          onExploreHeritage={handleLandingAction}
+          onOpenDashboard={handleLandingAction}
+          onOpenPractitioners={handleLandingAction}
+          onOpenLearn={handleLandingAction}
+          onOpenAiAnalysis={handleLandingAction}
+          onOpenDocumentation={handleLandingAction}
+          onOpenLogin={handleLandingAction}
+          onJoinMission={handleLandingAction}
         />
 
         {/* Global Modals on Landing Page */}
@@ -295,9 +306,9 @@ export default function App() {
     );
   }
 
-  // Screen 2: Dedicated 3-Role Login Page (1st Shishya, 2nd Guru, 3rd Admin)
-  // Strict Auth Guard: User MUST log in before any home or dashboard pages are accessible!
-  if (!currentUser || activeView === 'LOGIN') {
+  // Screen 2: Dedicated 3-Role Login Page
+  // Strict Auth Guard: Do NOT ask for login credentials again if user is already logged in!
+  if (!currentUser || (activeView === 'LOGIN' && !currentUser)) {
     return (
       <LoginPageView
         onLoginSuccess={handleLoginSuccess}
