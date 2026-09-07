@@ -9,6 +9,7 @@ import {
   Flame 
 } from 'lucide-react';
 import { RECENT_ACTIVITIES, TOP_AT_RISK_TRADITIONS } from '../data/heritageData';
+import { getTraditionImage, getCategoryFallback } from '../utils/imageResolver';
 
 export default function HeritageDashboardView({ traditions, onSelectTradition, onNavigateView }) {
   const totalCount = traditions && traditions.length > 0 ? traditions.length : 32;
@@ -174,8 +175,13 @@ export default function HeritageDashboardView({ traditions, onSelectTradition, o
                   >
                     <div className="flex items-center gap-3">
                       <img
-                        src={tradition.image}
+                        src={getTraditionImage(tradition)}
                         alt={tradition.name}
+                        loading="lazy"
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = getCategoryFallback(tradition.category, tradition.state);
+                        }}
                         className="w-10 h-10 rounded-xl object-cover border border-stone-200"
                       />
                       <div>

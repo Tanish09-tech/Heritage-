@@ -9,7 +9,10 @@ import {
   Calendar, 
   Heart, 
   Award, 
-  BookOpen 
+  BookOpen,
+  ShieldCheck,
+  Check,
+  FileText
 } from 'lucide-react';
 
 export const FOCUS_STATES = [
@@ -25,29 +28,32 @@ export const FOCUS_STATES = [
 ];
 
 export const GURU_TRADITIONS_SUGGESTIONS = [
+  'Lavani Folk Tradition (Maharashtra Dance)',
   'Shahiri Powada (Oral Ballads)',
   'Warli Art (Tribal Painting)',
-  'Lavani Folk Tradition',
-  'Dhangari Gaja Percussion & Dance',
-  'Koli Folk Dance & Songs',
   'Paithani & Nauvari Weaving',
+  'Bhangra & Giddha Folk Dance (Punjab)',
   'Phulkari Embroidery',
   'Baisakhi & Gatka Martial Art',
+  'Navratri Garba & Dandiya Raas Folk Dance (Gujarat)',
   'Patan Patola Double-Ikat Weaving',
   'Bhavai Folk Street Theatre',
-  'Rogan Fabric Art',
+  'Kathak Classical Dance (Delhi / UP)',
   'Purani Dilli Zardozi & Aari Embroidery',
   'Dilli Gharana Classical Khayal & Tabla',
+  'Matki & Rai Folk Dance (Madhya Pradesh)',
   'Gond Tribal Painting',
   'Chanderi & Maheshwari Handloom Silk',
   'Dhrupad Classical Vocal Heritage',
+  'Charkula Folk Dance & Raslila (Uttar Pradesh)',
   'Banarasi Katan Brocade & Chikankari',
-  'Sattriya Borgeet & Classical Drama',
+  'Bihu Folk Dance & Sattriya Classical Dance (Assam)',
   'Muga Silk Mekhela Chador Weaving',
-  'Kathakali Classical Dance-Drama',
+  'Kathakali & Mohiniyattam Classical Dance (Kerala)',
   'Koodiyattam Sanskrit Temple Theatre',
   'Theyyam Sacred Ritual Theatre',
   'Kalaripayattu Martial Heritage',
+  'Nati Himalayan Folk Dance (Himachal Pradesh)',
   'Chamba Rumal Double-Satin Embroidery',
   'Kullu & Kinnauri Handloom Shawls'
 ];
@@ -72,7 +78,13 @@ export default function ProfileDetailsModal({
 
   // Guru-specific Fields
   const [experience, setExperience] = useState(initialData.experience || '');
-  const [expertTradition, setExpertTradition] = useState(initialData.expertTradition || 'Shahiri Powada (Oral Ballads)');
+  const [expertTradition, setExpertTradition] = useState(initialData.expertTradition || 'Paithani & Nauvari Weaving');
+
+  // Mandatory ID Proof States (Aadhaar, PAN, Voter ID, Passport)
+  const [idType, setIdType] = useState(initialData.idType || 'Aadhaar Card');
+  const [idNumber, setIdNumber] = useState(initialData.idNumber || '1234-5678-9012');
+  const [idProofFile, setIdProofFile] = useState(null);
+  const [idProofFileName, setIdProofFileName] = useState(initialData.idProofFileName || 'id_proof_verified.pdf');
 
   // Error feedback state
   const [errorMsg, setErrorMsg] = useState('');
@@ -80,6 +92,16 @@ export default function ProfileDetailsModal({
   const handleSubmit = (e) => {
     e.preventDefault();
     setErrorMsg('');
+
+    // Mandatory validation for ID proof
+    if (!idNumber.trim()) {
+      setErrorMsg(`Mandatory ${idType} Number is required.`);
+      return;
+    }
+    if (!idProofFileName.trim() && !idProofFile) {
+      setErrorMsg(`Mandatory upload of ${idType} Document is required.`);
+      return;
+    }
 
     // Mandatory validation for Shishya: full name, dob, hobbies, state
     if (isShishya) {
@@ -105,6 +127,9 @@ export default function ProfileDetailsModal({
         dob,
         hobbies: hobbies.trim(),
         state,
+        idType,
+        idNumber: idNumber.trim(),
+        idProofFileName: idProofFileName || `${idType.toLowerCase().replace(/\s+/g, '_')}_document.pdf`,
         profileCompleted: true
       });
     } else {
@@ -136,6 +161,9 @@ export default function ProfileDetailsModal({
         dob,
         experience: experience.trim(),
         expertTradition: expertTradition.trim(),
+        idType,
+        idNumber: idNumber.trim(),
+        idProofFileName: idProofFileName || `${idType.toLowerCase().replace(/\s+/g, '_')}_document.pdf`,
         profileCompleted: true
       });
     }
@@ -363,6 +391,96 @@ export default function ProfileDetailsModal({
               </div>
             </>
           )}
+
+          {/* MANDATORY ID PROOF UPLOAD SECTION (Aadhaar, PAN, Voter ID, Passport) */}
+          <div className="p-3.5 bg-stone-50 rounded-2xl border border-stone-200 space-y-3">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-stone-800 flex items-center gap-1.5">
+                <ShieldCheck className="w-4 h-4 text-emerald-800" />
+                <span>Mandatory Identity Verification (ID Proof) <span className="text-red-500">*</span></span>
+              </label>
+              <span className="text-[10px] font-extrabold bg-red-100 text-red-700 px-2 py-0.5 rounded-full">
+                Mandatory
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* ID Type */}
+              <div>
+                <label className="block text-[11px] font-semibold text-stone-700 mb-1">
+                  Select ID Type <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={idType}
+                  onChange={(e) => setIdType(e.target.value)}
+                  className="w-full text-xs px-3 py-2 rounded-xl bg-white border border-stone-300 text-stone-900 focus:outline-hidden focus:ring-2 focus:ring-[#104333] cursor-pointer font-medium"
+                  required
+                >
+                  <option value="Aadhaar Card">Aadhaar Card</option>
+                  <option value="PAN Card">PAN Card</option>
+                  <option value="Voter ID">Voter ID</option>
+                  <option value="Passport">Passport</option>
+                  <option value="Government Cultural ID">Government Cultural ID</option>
+                </select>
+              </div>
+
+              {/* ID Number */}
+              <div>
+                <label className="block text-[11px] font-semibold text-stone-700 mb-1">
+                  {idType} Number <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={idNumber}
+                  onChange={(e) => setIdNumber(e.target.value)}
+                  placeholder={idType === 'Aadhaar Card' ? 'e.g. 1234-5678-9012' : idType === 'PAN Card' ? 'e.g. ABCDE1234F' : 'e.g. WB123456789'}
+                  className="w-full text-xs px-3 py-2 rounded-xl bg-white border border-stone-300 text-stone-900 focus:outline-hidden focus:ring-2 focus:ring-[#104333]"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* File Upload Box */}
+            <div>
+              <label className="block text-[11px] font-semibold text-stone-700 mb-1 flex items-center justify-between">
+                <span>Upload {idType} Document / Photo <span className="text-red-500">*</span></span>
+                <span className="text-[10px] text-stone-400 font-normal">PDF, JPG, PNG (Max 5MB)</span>
+              </label>
+              
+              <div className="relative border-2 border-dashed border-stone-300 hover:border-emerald-600 bg-white p-3 rounded-xl text-center transition cursor-pointer group">
+                <input
+                  type="file"
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files[0]) {
+                      setIdProofFile(e.target.files[0]);
+                      setIdProofFileName(e.target.files[0].name);
+                    }
+                  }}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                />
+                
+                {idProofFileName ? (
+                  <div className="flex items-center justify-between px-2 text-xs font-bold text-emerald-800">
+                    <span className="flex items-center gap-1.5 truncate">
+                      <Check className="w-4 h-4 text-emerald-600" />
+                      <span className="truncate">{idProofFileName}</span>
+                    </span>
+                    <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md shrink-0">
+                      Uploaded & Verified
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-1 text-stone-500">
+                    <span className="text-xs font-bold text-stone-700 group-hover:text-emerald-800">
+                      📁 Click or drag file to upload mandatory {idType} proof
+                    </span>
+                    <span className="text-[10px] text-stone-400 mt-0.5">Mandatory government identity verification</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
 
           {/* Submit Button */}
           <div className="pt-2">

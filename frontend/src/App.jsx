@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import AppHeader from './components/AppHeader';
 import LandingPageView from './components/LandingPageView';
@@ -19,6 +19,7 @@ import ValidationQueueView from './components/ValidationQueueView';
 import RecommendationEngineView from './components/RecommendationEngineView';
 import SettingsProfileView from './components/SettingsProfileView';
 import ProfileDetailsModal from './components/ProfileDetailsModal';
+import { api } from './services/api';
 
 import { 
   PILOT_TRADITIONS, 
@@ -74,15 +75,57 @@ export default function App() {
   const [queue, setQueue] = useState(VALIDATION_QUEUE || []);
   const [archivedItems, setArchivedItems] = useState(ARCHIVED_KNOWLEDGE_ITEMS || []);
 
+  // Sync with Backend on Component Mount
+  useEffect(() => {
+    let isMounted = true;
+
+    // Load living traditions from backend
+    api.getTraditions().then(backendTraditions => {
+      if (isMounted && backendTraditions && backendTraditions.length > 0) {
+        setTraditions(backendTraditions);
+        if (!selectedTradition) setSelectedTradition(backendTraditions[0]);
+      }
+    }).catch(err => {
+      console.warn('Using local traditions fallback:', err.message);
+    });
+
+    // Load validation queue from backend
+    api.getValidationQueue().then(backendQueue => {
+      if (isMounted && backendQueue && backendQueue.length > 0) {
+        setQueue(backendQueue);
+      }
+    }).catch(err => {
+      console.warn('Using local validation queue fallback:', err.message);
+    });
+
+    // Load knowledge vault items from backend
+    api.getVaultItems().then(backendVault => {
+      if (isMounted && backendVault && backendVault.length > 0) {
+        setArchivedItems(backendVault);
+      }
+    }).catch(err => {
+      console.warn('Using local knowledge vault fallback:', err.message);
+    });
+
+    return () => { isMounted = false; };
+  }, []);
+
   // Handlers
   const handleSelectTradition = (tradition) => {
     setSelectedTradition(tradition);
     handleNavigateView('TRADITION_DETAIL');
   };
 
-  const handleSaveNewTradition = (newTradition) => {
-    setTraditions([newTradition, ...traditions]);
-    setSelectedTradition(newTradition);
+  const handleSaveNewTradition = async (newTradition) => {
+    try {
+      const saved = await api.createTradition(newTradition);
+      setTraditions(prev => [saved, ...prev]);
+      setSelectedTradition(saved);
+    } catch (err) {
+      console.warn('Error saving to backend, saving locally:', err);
+      setTraditions(prev => [newTradition, ...prev]);
+      setSelectedTradition(newTradition);
+    }
   };
 
   const handleNavigateView = (view) => {
@@ -160,6 +203,11 @@ export default function App() {
     setCurrentUser(updatedUser);
     setIsProfileModalOpen(false);
 
+    // Sync to backend database
+    api.registerUser(updatedUser).catch(err => {
+      console.warn('Backend user registration sync error:', err.message);
+    });
+
     const destView = pendingTargetView || (updatedUser.role === 'LEARNER' ? 'LEARNER_DASHBOARD' : (updatedUser.role === 'PRACTITIONER' ? 'PRACTITIONER_DASHBOARD' : 'DASHBOARD'));
     setActiveView(destView);
     setPendingTargetView(null);
@@ -196,6 +244,11 @@ export default function App() {
     };
 
     const destView = targetView || (roleKey === 'LEARNER' ? 'LEARNER_DASHBOARD' : (roleKey === 'PRACTITIONER' ? 'PRACTITIONER_DASHBOARD' : 'DASHBOARD'));
+
+    // Sync to backend database
+    api.registerUser(userObj).catch(err => {
+      console.warn('Backend user sync on login error:', err.message);
+    });
 
     setCurrentRole(roleKey);
     setCurrentUser(userObj);
@@ -307,6 +360,7 @@ export default function App() {
                 traditions={traditions}
                 onSelectTradition={handleSelectTradition}
                 onOpenAddTradition={() => handleNavigateView('ADD_TRADITION')}
+                currentRole={currentRole}
               />
             )}
 
@@ -363,7 +417,14 @@ export default function App() {
             {activeView === 'DOCUMENTATION' && (
               <KnowledgeVaultView
                 archivedItems={archivedItems}
-                onAddArchivedItem={(item) => setArchivedItems([item, ...archivedItems])}
+                onAddArchivedItem={async (item) => {
+                  try {
+                    const created = await api.addVaultItem(item);
+                    setArchivedItems(prev => [created, ...prev]);
+                  } catch (e) {
+                    setArchivedItems(prev => [item, ...prev]);
+                  }
+                }}
               />
             )}
 
@@ -371,7 +432,12 @@ export default function App() {
             {activeView === 'VALIDATION' && (
               <ValidationQueueView
                 queue={queue}
-                onApproveItem={(id) => {
+                onApproveItem={async (id) => {
+                  try {
+                    await api.verifyValidationItem(id);
+                  } catch (e) {
+                    console.warn('API verification call failed:', e);
+                  }
                   setQueue(prev => prev.map(q => q.id === id ? { ...q, status: 'COMMUNITY_VALIDATED' } : q));
                 }}
               />

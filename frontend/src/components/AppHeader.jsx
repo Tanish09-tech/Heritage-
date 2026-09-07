@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { 
   Layers, 
   Home, 
@@ -6,6 +6,7 @@ import {
   Globe, 
   ChevronDown 
 } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function AppHeader({ 
   activeView, 
@@ -17,17 +18,7 @@ export default function AppHeader({
   onOpenAuth, 
   onOpenRoleSelection 
 }) {
-  const [selectedLanguage, setSelectedLanguage] = useState('English');
-
-  const languages = [
-    { code: 'en', label: 'English', native: 'English' },
-    { code: 'mr', label: 'Marathi', native: 'मराठी (Marathi)' },
-    { code: 'hi', label: 'Hindi', native: 'हिन्दी (Hindi)' },
-    { code: 'bn', label: 'Bengali', native: 'বাংলা (Bengali)' },
-    { code: 'te', label: 'Telugu', native: 'తెలుగు (Telugu)' },
-    { code: 'ta', label: 'Tamil', native: 'தமிழ் (Tamil)' },
-    { code: 'ml', label: 'Malayalam', native: 'മലയാളം (Malayalam)' },
-  ];
+  const { language, changeLanguage, t, languages } = useLanguage();
 
   // Screens strictly filtered by user role
   const getScreensForRole = () => {
@@ -116,35 +107,27 @@ export default function AppHeader({
         </h2>
       </div>
 
-      {/* Center Controls: Role-Specific View Switcher & Home Button */}
+      {/* Center Controls: Role-Specific View Switcher (Hidden for Shishya & Guru) & Home Button */}
       <div className="flex items-center gap-2">
-        <div className="flex items-center gap-1.5 bg-[#f0f4f2] border border-[#d1ded8] px-3 py-1.5 rounded-xl">
-          <Layers className="w-3.5 h-3.5 text-emerald-800" />
-          <span className="text-[11px] font-bold text-emerald-950 uppercase tracking-wider hidden md:inline">
-            Active Views:
-          </span>
-          <select
-            value={activeView}
-            onChange={(e) => setActiveView(e.target.value)}
-            className="bg-transparent text-xs font-semibold text-stone-800 focus:outline-hidden cursor-pointer"
-          >
-            {screens.map(s => (
-              <option key={s.id} value={s.id}>
-                {s.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Quick Landing Page Button */}
-        <button
-          onClick={() => setActiveView('LANDING')}
-          className="hidden sm:flex items-center gap-1.5 text-xs font-medium text-stone-600 hover:text-stone-900 bg-stone-100 hover:bg-stone-200 px-2.5 py-1.5 rounded-lg transition"
-          title="Go to Home Landing Page"
-        >
-          <Home className="w-3.5 h-3.5" />
-          <span>Home</span>
-        </button>
+        {currentRole !== 'LEARNER' && currentRole !== 'PRACTITIONER' && (
+          <div className="flex items-center gap-1.5 bg-[#f0f4f2] border border-[#d1ded8] px-3 py-1.5 rounded-xl">
+            <Layers className="w-3.5 h-3.5 text-emerald-800" />
+            <span className="text-[11px] font-bold text-emerald-950 uppercase tracking-wider hidden md:inline">
+              Active Views:
+            </span>
+            <select
+              value={activeView}
+              onChange={(e) => setActiveView(e.target.value)}
+              className="bg-transparent text-xs font-semibold text-stone-800 focus:outline-hidden cursor-pointer"
+            >
+              {screens.map(s => (
+                <option key={s.id} value={s.id}>
+                  {s.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       {/* Right Controls: Multilingual Selector & User Profile */}
@@ -154,14 +137,14 @@ export default function AppHeader({
         <div className="flex items-center gap-1.5 bg-[#f8faf9] hover:bg-[#edf3f0] border border-stone-200 px-2.5 py-1.5 rounded-xl transition shadow-2xs">
           <Globe className="w-3.5 h-3.5 text-emerald-800 shrink-0" />
           <select
-            value={selectedLanguage}
-            onChange={(e) => setSelectedLanguage(e.target.value)}
+            value={language}
+            onChange={(e) => changeLanguage(e.target.value)}
             className="bg-transparent text-xs font-semibold text-stone-800 focus:outline-hidden cursor-pointer"
             title="Select Language / भाषा निवडा"
           >
             {languages.map((lang) => (
-              <option key={lang.code} value={lang.label}>
-                {lang.native}
+              <option key={lang.code} value={lang.code}>
+                {lang.flag} {lang.native}
               </option>
             ))}
           </select>

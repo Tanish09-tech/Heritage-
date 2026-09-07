@@ -17,6 +17,60 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { FOCUS_STATES, GURU_TRADITIONS_SUGGESTIONS } from './ProfileDetailsModal';
+import { api } from '../services/api';
+
+export const FIXED_CREDENTIALS = [
+  {
+    roleId: 'SHISHYA',
+    label: 'Shishya 1 (Aniket)',
+    email: 'shishya1@sanskriti.gov.in',
+    password: 'password123',
+    name: 'Aniket Deshmukh',
+    state: 'Maharashtra',
+    dob: '2002-05-15',
+    hobbies: 'Shahiri Powada recitation, Daf percussion, Historical Maratha Ballads'
+  },
+  {
+    roleId: 'SHISHYA',
+    label: 'Shishya 2 (Simran)',
+    email: 'shishya2@sanskriti.gov.in',
+    password: 'password123',
+    name: 'Simran Kaur',
+    state: 'Punjab',
+    dob: '2003-11-20',
+    hobbies: 'Phulkari folk embroidery, Giddha folk dance, Punjabi folk music'
+  },
+  {
+    roleId: 'GURU',
+    label: 'Guru 1 (Tukaram)',
+    email: 'guru1@sanskriti.gov.in',
+    password: 'password123',
+    name: 'Shahir Tukaram Jagtap',
+    state: 'Maharashtra',
+    dob: '1968-08-20',
+    experience: '28 Years of continuous Shahiri Akhada & Daf oral tradition',
+    expertTradition: 'Shahiri Powada (Oral Ballads)'
+  },
+  {
+    roleId: 'GURU',
+    label: 'Guru 2 (Harinder)',
+    email: 'guru2@sanskriti.gov.in',
+    password: 'password123',
+    name: 'Ustad Harinder Singh',
+    state: 'Punjab',
+    dob: '1965-03-12',
+    experience: '32 Years of traditional Gatka Shastar Vidiya & folk rhythms',
+    expertTradition: 'Baisakhi & Gatka Martial Art'
+  },
+  {
+    roleId: 'ADMIN',
+    label: 'Admin (Dr. Rajesh)',
+    email: 'admin@sanskriti.gov.in',
+    password: 'adminpassword123',
+    name: 'Dr. Rajesh Sharma',
+    state: 'Delhi'
+  }
+];
 
 export default function LoginPageView({ onLoginSuccess, onBackToLanding }) {
   // Step state: 'AUTH' (credentials) | 'DETAILS' (mandatory details form for Shishya & Guru)
@@ -41,7 +95,14 @@ export default function LoginPageView({ onLoginSuccess, onBackToLanding }) {
   const [state, setState] = useState('Maharashtra');
   const [hobbies, setHobbies] = useState('');
   const [experience, setExperience] = useState('');
-  const [expertTradition, setExpertTradition] = useState('Shahiri Powada (Oral Ballads)');
+  const [expertTradition, setExpertTradition] = useState('Paithani & Nauvari Weaving');
+
+  // Mandatory ID Proof States (Aadhaar, PAN, Voter ID, Passport)
+  const [idType, setIdType] = useState('Aadhaar Card');
+  const [idNumber, setIdNumber] = useState('1234-5678-9012');
+  const [idProofFile, setIdProofFile] = useState(null);
+  const [idProofFileName, setIdProofFileName] = useState('aadhaar_card_verified.pdf');
+
   const [errorMsg, setErrorMsg] = useState('');
 
   // 3 Role definitions
@@ -94,25 +155,66 @@ export default function LoginPageView({ onLoginSuccess, onBackToLanding }) {
     setSelectedRole(roleId);
     setEmail(roleData[roleId].email);
     setDetailFullName(fullName || roleData[roleId].name);
+    setErrorMsg('');
+  };
+
+  const handleSelectPreset = (preset) => {
+    setSelectedRole(preset.roleId);
+    setEmail(preset.email);
+    setPassword(preset.password);
+    setFullName(preset.name);
+    setDetailFullName(preset.name);
+    if (preset.dob) setDob(preset.dob);
+    if (preset.state) setState(preset.state);
+    if (preset.hobbies) setHobbies(preset.hobbies);
+    if (preset.experience) setExperience(preset.experience);
+    if (preset.expertTradition) setExpertTradition(preset.expertTradition);
+    setActiveTab('LOGIN');
+    setErrorMsg('');
   };
 
   // Step 1: Submit Credentials
-  const handleAuthSubmit = (e) => {
+  const handleAuthSubmit = async (e) => {
     e.preventDefault();
+    setErrorMsg('');
     const current = roleData[selectedRole];
 
-    // Admin can proceed directly without details
-    if (selectedRole === 'ADMIN') {
-      onLoginSuccess(current.roleKey, current.targetView, {
-        email,
-        name: fullName || current.name,
-        role: current.roleKey,
-        profileCompleted: true
-      });
+    // If User is Logging In: Must verify against Backend Database
+    if (activeTab === 'LOGIN') {
+      try {
+        const user = await api.loginUser({
+          email: email.trim(),
+          password,
+          role: current.roleKey
+        });
+
+        // Backend login succeeded! Proceed to dashboard
+        onLoginSuccess(current.roleKey, current.targetView, user);
+      } catch (err) {
+        // Shishya/Guru must register first before login
+        setErrorMsg(err.message || 'Account not found. Please register first.');
+      }
       return;
     }
 
-    // For Shishya and Guru, mandatory details form MUST appear
+    // If User is Signing Up (Registering first):
+    if (selectedRole === 'ADMIN') {
+      try {
+        const user = await api.registerUser({
+          email: email.trim(),
+          password,
+          role: 'AUTHORITY',
+          name: fullName || current.name,
+          profileCompleted: true
+        });
+        onLoginSuccess('AUTHORITY', current.targetView, user);
+      } catch (err) {
+        setErrorMsg(err.message || 'Admin registration failed.');
+      }
+      return;
+    }
+
+    // For Shishya and Guru, open mandatory details form to complete registration
     setDetailFullName(fullName.trim() || current.name);
     setErrorMsg('');
     setStep('DETAILS');
@@ -136,10 +238,20 @@ export default function LoginPageView({ onLoginSuccess, onBackToLanding }) {
   };
 
   // Step 2: Submit Mandatory Profile Details
-  const handleDetailsSubmit = (e) => {
+  const handleDetailsSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg('');
     const current = roleData[selectedRole];
+
+    // Mandatory validation for ID proof across both roles
+    if (!idNumber.trim()) {
+      setErrorMsg(`Mandatory ${idType} Number is required.`);
+      return;
+    }
+    if (!idProofFileName.trim() && !idProofFile) {
+      setErrorMsg(`Mandatory upload of ${idType} Document is required.`);
+      return;
+    }
 
     if (selectedRole === 'SHISHYA') {
       // Mandatory for Shishya: full name, dob, hobbies, state
@@ -152,7 +264,7 @@ export default function LoginPageView({ onLoginSuccess, onBackToLanding }) {
         return;
       }
       if (!hobbies.trim()) {
-        setErrorMsg('Hobbies & Interests are mandatory for Shishya.');
+        setErrorMsg('Hobbies & Cultural Interests are mandatory for Shishya.');
         return;
       }
       if (!state) {
@@ -160,15 +272,25 @@ export default function LoginPageView({ onLoginSuccess, onBackToLanding }) {
         return;
       }
 
-      onLoginSuccess(current.roleKey, current.targetView, {
-        email,
-        name: detailFullName.trim(),
-        role: current.roleKey,
-        dob,
-        hobbies: hobbies.trim(),
-        state,
-        profileCompleted: true
-      });
+      try {
+        const registeredUser = await api.registerUser({
+          email: email.trim(),
+          password: password || 'password123',
+          name: detailFullName.trim(),
+          role: current.roleKey,
+          dob,
+          hobbies: hobbies.trim(),
+          state,
+          idType,
+          idNumber: idNumber.trim(),
+          idProofFileName: idProofFileName || `${idType.toLowerCase().replace(/\s+/g, '_')}_document.pdf`,
+          profileCompleted: true
+        });
+
+        onLoginSuccess(current.roleKey, current.targetView, registeredUser);
+      } catch (err) {
+        setErrorMsg(err.message || 'Registration failed in backend.');
+      }
     } else if (selectedRole === 'GURU') {
       // Mandatory for Guru: full name, state, dob, experience, expert of which skills/tradition
       if (!detailFullName.trim()) {
@@ -192,16 +314,26 @@ export default function LoginPageView({ onLoginSuccess, onBackToLanding }) {
         return;
       }
 
-      onLoginSuccess(current.roleKey, current.targetView, {
-        email,
-        name: detailFullName.trim(),
-        role: current.roleKey,
-        state,
-        dob,
-        experience: experience.trim(),
-        expertTradition: expertTradition.trim(),
-        profileCompleted: true
-      });
+      try {
+        const registeredUser = await api.registerUser({
+          email: email.trim(),
+          password: password || 'password123',
+          name: detailFullName.trim(),
+          role: current.roleKey,
+          state,
+          dob,
+          experience: experience.trim(),
+          expertTradition: expertTradition.trim(),
+          idType,
+          idNumber: idNumber.trim(),
+          idProofFileName: idProofFileName || `${idType.toLowerCase().replace(/\s+/g, '_')}_document.pdf`,
+          profileCompleted: true
+        });
+
+        onLoginSuccess(current.roleKey, current.targetView, registeredUser);
+      } catch (err) {
+        setErrorMsg(err.message || 'Registration failed in backend.');
+      }
     }
   };
 
@@ -279,6 +411,7 @@ export default function LoginPageView({ onLoginSuccess, onBackToLanding }) {
               </div>
             </div>
 
+
             {/* Form Card with Tabs on Top */}
             <div className="w-full bg-white rounded-2xl shadow-xl border border-stone-100 overflow-hidden">
               
@@ -286,7 +419,10 @@ export default function LoginPageView({ onLoginSuccess, onBackToLanding }) {
               <div className="flex bg-stone-100/90 p-1 border-b border-stone-100">
                 <button
                   type="button"
-                  onClick={() => setActiveTab('LOGIN')}
+                  onClick={() => {
+                    setActiveTab('LOGIN');
+                    setErrorMsg('');
+                  }}
                   className={`flex-1 py-2 text-xs font-bold rounded-xl transition cursor-pointer ${
                     activeTab === 'LOGIN'
                       ? 'bg-white text-stone-900 shadow-xs'
@@ -297,19 +433,44 @@ export default function LoginPageView({ onLoginSuccess, onBackToLanding }) {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setActiveTab('SIGNUP')}
+                  onClick={() => {
+                    setActiveTab('SIGNUP');
+                    setErrorMsg('');
+                  }}
                   className={`flex-1 py-2 text-xs font-bold rounded-xl transition cursor-pointer ${
                     activeTab === 'SIGNUP'
                       ? 'bg-white text-stone-900 shadow-xs'
                       : 'text-stone-500 hover:text-stone-800'
                   }`}
                 >
-                  Sign Up
+                  Sign Up (Register)
                 </button>
               </div>
 
               {/* Form Body */}
               <form onSubmit={handleAuthSubmit} className="p-6 sm:p-7 space-y-4">
+                
+                {/* Error Banner with helpful register link */}
+                {errorMsg && (
+                  <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs flex flex-col gap-1.5 animate-shake">
+                    <div className="flex items-start gap-2 font-semibold">
+                      <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+                      <span>{errorMsg}</span>
+                    </div>
+                    {activeTab === 'LOGIN' && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveTab('SIGNUP');
+                          setErrorMsg('');
+                        }}
+                        className="text-[11px] font-bold text-red-700 underline text-left hover:text-red-900 cursor-pointer pl-6"
+                      >
+                        → Click here to Register as {roleData[selectedRole].title} with your details first
+                      </button>
+                    )}
+                  </div>
+                )}
                 
                 {/* Full Name (Sign Up only) */}
                 {activeTab === 'SIGNUP' && (
@@ -407,7 +568,9 @@ export default function LoginPageView({ onLoginSuccess, onBackToLanding }) {
                 >
                   {selectedRole === 'ADMIN'
                     ? (activeTab === 'LOGIN' ? 'Login as Admin' : 'Sign Up as Admin')
-                    : `Continue to ${roleData[selectedRole].title} Details →`}
+                    : activeTab === 'LOGIN'
+                      ? `Log In as ${roleData[selectedRole].title}`
+                      : `Continue to Mandatory ${roleData[selectedRole].title} Details →`}
                 </button>
 
                 {/* 'or login with' Divider */}
@@ -678,6 +841,96 @@ export default function LoginPageView({ onLoginSuccess, onBackToLanding }) {
                   </div>
                 </>
               )}
+
+              {/* MANDATORY ID PROOF UPLOAD SECTION (Aadhaar, PAN, Voter ID, Passport) */}
+              <div className="p-3.5 bg-stone-50 rounded-2xl border border-stone-200 space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-stone-800 flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 text-emerald-800" />
+                    <span>Mandatory Identity Verification (ID Proof) <span className="text-red-500">*</span></span>
+                  </label>
+                  <span className="text-[10px] font-extrabold bg-red-100 text-red-700 px-2 py-0.5 rounded-full">
+                    Mandatory
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {/* ID Type */}
+                  <div>
+                    <label className="block text-[11px] font-semibold text-stone-700 mb-1">
+                      Select ID Type <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      value={idType}
+                      onChange={(e) => setIdType(e.target.value)}
+                      className="w-full text-xs px-3 py-2 rounded-xl bg-white border border-stone-300 text-stone-900 focus:outline-hidden focus:ring-2 focus:ring-[#104333] cursor-pointer font-medium"
+                      required
+                    >
+                      <option value="Aadhaar Card">Aadhaar Card</option>
+                      <option value="PAN Card">PAN Card</option>
+                      <option value="Voter ID">Voter ID</option>
+                      <option value="Passport">Passport</option>
+                      <option value="Government Cultural ID">Government Cultural ID</option>
+                    </select>
+                  </div>
+
+                  {/* ID Number */}
+                  <div>
+                    <label className="block text-[11px] font-semibold text-stone-700 mb-1">
+                      {idType} Number <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={idNumber}
+                      onChange={(e) => setIdNumber(e.target.value)}
+                      placeholder={idType === 'Aadhaar Card' ? 'e.g. 1234-5678-9012' : idType === 'PAN Card' ? 'e.g. ABCDE1234F' : 'e.g. WB123456789'}
+                      className="w-full text-xs px-3 py-2 rounded-xl bg-white border border-stone-300 text-stone-900 focus:outline-hidden focus:ring-2 focus:ring-[#104333]"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* File Upload Box */}
+                <div>
+                  <label className="block text-[11px] font-semibold text-stone-700 mb-1 flex items-center justify-between">
+                    <span>Upload {idType} Document / Photo <span className="text-red-500">*</span></span>
+                    <span className="text-[10px] text-stone-400 font-normal">PDF, JPG, PNG (Max 5MB)</span>
+                  </label>
+                  
+                  <div className="relative border-2 border-dashed border-stone-300 hover:border-emerald-600 bg-white p-3 rounded-xl text-center transition cursor-pointer group">
+                    <input
+                      type="file"
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                          setIdProofFile(e.target.files[0]);
+                          setIdProofFileName(e.target.files[0].name);
+                        }
+                      }}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                    />
+                    
+                    {idProofFileName ? (
+                      <div className="flex items-center justify-between px-2 text-xs font-bold text-emerald-800">
+                        <span className="flex items-center gap-1.5 truncate">
+                          <Check className="w-4 h-4 text-emerald-600" />
+                          <span className="truncate">{idProofFileName}</span>
+                        </span>
+                        <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md shrink-0">
+                          Uploaded & Verified
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center py-1 text-stone-500">
+                        <span className="text-xs font-bold text-stone-700 group-hover:text-emerald-800">
+                          📁 Click or drag file to upload mandatory {idType} proof
+                        </span>
+                        <span className="text-[10px] text-stone-400 mt-0.5">Mandatory government identity verification</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
 
               {/* Submit Button */}
               <div className="pt-2">

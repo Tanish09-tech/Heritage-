@@ -1,23 +1,42 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Plus, Filter, Sparkles, ChevronRight } from 'lucide-react';
 import { TRADITION_CATEGORIES } from '../data/heritageData';
+import { getTraditionImage, getCategoryFallback, validateTraditionImages } from '../utils/imageResolver';
 
 export default function TraditionsExplorerView({ 
   traditions, 
   onSelectTradition, 
-  onOpenAddTradition 
+  onOpenAddTradition,
+  currentRole = 'AUTHORITY'
 }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
+  const [genderFilter, setGenderFilter] = useState('ALL'); // 'ALL' | 'Women' | 'Men'
+
+  const isAdmin = currentRole === 'AUTHORITY';
+
+  useEffect(() => {
+    if (import.meta?.env?.MODE !== 'production') {
+      validateTraditionImages(traditions);
+    }
+  }, [traditions]);
 
   const filteredTraditions = traditions.filter((t) => {
     const matchesSearch = t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           t.state.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           t.category.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = activeCategory === 'All' || 
-                            t.category.toLowerCase() === activeCategory.toLowerCase() ||
-                            (t.secondaryCategory && t.secondaryCategory.toLowerCase() === activeCategory.toLowerCase());
-    return matchesSearch && matchesCategory;
+                            t.category.toLowerCase() === activeCategory.toLowerCase();
+    
+    // Gender match filter for Traditional Clothes
+    let matchesGender = true;
+    if (activeCategory === 'Traditional Clothes' && genderFilter !== 'ALL') {
+      matchesGender = t.gender ? t.gender.toLowerCase() === genderFilter.toLowerCase() : false;
+    } else if (genderFilter !== 'ALL') {
+      matchesGender = !t.gender || (t.gender && t.gender.toLowerCase() === genderFilter.toLowerCase());
+    }
+
+    return matchesSearch && matchesCategory && matchesGender;
   });
 
   return (
@@ -38,35 +57,84 @@ export default function TraditionsExplorerView({
           <Search className="w-4 h-4 text-stone-400 absolute left-3 top-3" />
         </div>
 
-        {/* Add Tradition Button */}
-        <button
-          onClick={onOpenAddTradition}
-          className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-[#133e31] hover:bg-[#0e2d23] text-white text-xs font-bold shadow transition flex items-center justify-center gap-2"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Register New Tradition</span>
-        </button>
+        {/* Add Tradition Button - ADMIN (AUTHORITY) ONLY */}
+        {isAdmin ? (
+          <button
+            onClick={onOpenAddTradition}
+            className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-[#133e31] hover:bg-[#0e2d23] text-[#f4efe6] text-xs font-bold shadow transition flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Register New Tradition (Admin Only)</span>
+          </button>
+        ) : (
+          <div className="text-[11px] font-semibold text-stone-500 bg-stone-100 px-3 py-2 rounded-xl border border-stone-200">
+            ℹ️ Tradition registration restricted to Admin (Ministry Authority)
+          </div>
+        )}
 
       </div>
 
-      {/* Category Filter Pills */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-        {TRADITION_CATEGORIES.map((cat) => {
-          const isActive = activeCategory === cat;
-          return (
+      {/* Category Filter Pills & Gender Sub-Filter */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+          {TRADITION_CATEGORIES.map((cat) => {
+            const isActive = activeCategory === cat;
+            return (
+              <button
+                key={cat}
+                onClick={() => {
+                  setActiveCategory(cat);
+                  if (cat !== 'Traditional Clothes') {
+                    setGenderFilter('ALL');
+                  }
+                }}
+                className={`px-4 py-1.5 rounded-full text-xs font-medium transition whitespace-nowrap cursor-pointer ${
+                  isActive
+                    ? 'bg-stone-900 text-white font-bold shadow-xs'
+                    : 'bg-white text-stone-600 hover:bg-stone-100 border border-stone-200'
+                }`}
+              >
+                {cat}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Gender Toggle Sub-Bar - ONLY APPEARS IN TRADITIONAL CLOTHES */}
+        {activeCategory === 'Traditional Clothes' && (
+          <div className="flex items-center gap-2 bg-stone-100/90 p-1.5 rounded-xl border border-stone-200/80 w-fit animate-fadeIn">
             <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`px-4 py-1.5 rounded-full text-xs font-medium transition whitespace-nowrap ${
-                isActive
-                  ? 'bg-stone-900 text-white font-bold shadow-xs'
-                  : 'bg-white text-stone-600 hover:bg-stone-100 border border-stone-200'
+              onClick={() => setGenderFilter('ALL')}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
+                genderFilter === 'ALL'
+                  ? 'bg-[#133e31] text-[#f4efe6] shadow-sm'
+                  : 'bg-white text-stone-700 hover:bg-stone-50 border border-stone-200'
               }`}
             >
-              {cat}
+              <span>👔</span> All Attire
             </button>
-          );
-        })}
+            <button
+              onClick={() => setGenderFilter('Women')}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
+                genderFilter === 'Women'
+                  ? 'bg-[#133e31] text-[#f4efe6] shadow-sm'
+                  : 'bg-white text-stone-700 hover:bg-stone-50 border border-stone-200'
+              }`}
+            >
+              <span>👩</span> Women's Clothes
+            </button>
+            <button
+              onClick={() => setGenderFilter('Men')}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
+                genderFilter === 'Men'
+                  ? 'bg-[#133e31] text-[#f4efe6] shadow-sm'
+                  : 'bg-white text-stone-700 hover:bg-stone-50 border border-stone-200'
+              }`}
+            >
+              <span>👨</span> Men's Clothes
+            </button>
+          </div>
+        )}
       </div>
 
       {/* 3x2 / Grid of Tradition Cards */}
@@ -82,11 +150,16 @@ export default function TraditionsExplorerView({
               className="blueprint-card overflow-hidden cursor-pointer group transition-all duration-300 transform hover:-translate-y-1 hover:shadow-md flex flex-col justify-between"
             >
               {/* Image Container */}
-              <div className="relative h-44 w-full bg-stone-100 overflow-hidden">
+              <div className="relative h-64 sm:h-72 w-full bg-stone-100 overflow-hidden">
                 <img
-                  src={tradition.image}
+                  src={getTraditionImage(tradition)}
                   alt={tradition.name}
-                  className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                  loading="lazy"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = getCategoryFallback(tradition.category, tradition.state);
+                  }}
+                  className="w-full h-full object-cover object-[center_20%] group-hover:scale-105 transition-transform duration-500"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                 
@@ -94,6 +167,18 @@ export default function TraditionsExplorerView({
                 <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-xs text-[10px] font-bold text-stone-800 px-2.5 py-0.5 rounded-md shadow-xs">
                   {tradition.state}
                 </div>
+
+                {/* Gender Tag (if traditional clothes or tagged) */}
+                {tradition.gender && (
+                  <div className={`absolute top-3 right-3 text-[10px] font-extrabold px-2.5 py-0.5 rounded-md shadow-xs flex items-center gap-1 backdrop-blur-xs ${
+                    tradition.gender.toLowerCase() === 'women'
+                      ? 'bg-amber-100/95 text-amber-900 border border-amber-300'
+                      : 'bg-emerald-100/95 text-emerald-900 border border-emerald-300'
+                  }`}>
+                    <span>{tradition.gender.toLowerCase() === 'women' ? '👩' : '👨'}</span>
+                    <span>{tradition.gender}'s Clothes</span>
+                  </div>
+                )}
               </div>
 
               {/* Card Body */}

@@ -9,16 +9,49 @@ import {
   Users 
 } from 'lucide-react';
 import { CURRENT_LEARNER } from '../data/heritageData';
+import { getTraditionImage, getCategoryFallback } from '../utils/imageResolver';
 
 export default function LearnerDashboardView({ onNavigateToMatching, onSelectTradition, traditions, currentUser }) {
   const learner = {
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
+    learningJourney: {
+      requestsSent: 3,
+      connections: 2,
+      sessionsAttended: 14,
+      badgesEarned: 5
+    },
+    recommendations: [
+      {
+        id: 'rec-1',
+        tradition: 'Shahiri Powada',
+        masterName: 'Shahir Tukaram Jagtap',
+        matchPercent: '95%',
+        image: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80'
+      },
+      {
+        id: 'rec-2',
+        tradition: 'Koodiyattam',
+        masterName: 'Margi Madhu Chakyar',
+        matchPercent: '88%',
+        image: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=400&q=80'
+      }
+    ],
     ...CURRENT_LEARNER,
-    name: currentUser?.name || CURRENT_LEARNER.name,
-    location: currentUser?.state ? `${currentUser.state}, India` : CURRENT_LEARNER.location,
-    interests: currentUser?.hobbies || CURRENT_LEARNER.interests,
+    name: currentUser?.name || CURRENT_LEARNER?.name || 'Aniket Deshmukh',
+    location: currentUser?.state ? `${currentUser.state}, India` : (CURRENT_LEARNER?.state ? `${CURRENT_LEARNER.state}, India` : 'Pune, Maharashtra'),
+    interests: Array.isArray(currentUser?.hobbies) ? currentUser.hobbies.join(', ') : (currentUser?.hobbies || (Array.isArray(CURRENT_LEARNER?.interests) ? CURRENT_LEARNER.interests.join(', ') : 'Shahiri Powada, Warli Art')),
     dob: currentUser?.dob || '2002-05-15',
-    hobbies: currentUser?.hobbies || CURRENT_LEARNER.interests
+    hobbies: Array.isArray(currentUser?.hobbies) ? currentUser.hobbies.join(', ') : (currentUser?.hobbies || (Array.isArray(CURRENT_LEARNER?.interests) ? CURRENT_LEARNER.interests.join(', ') : 'Shahiri Powada, Warli Art'))
   };
+
+  const learningJourney = learner.learningJourney || {
+    requestsSent: 3,
+    connections: 2,
+    sessionsAttended: 14,
+    badgesEarned: 5
+  };
+
+  const recommendations = learner.recommendations || [];
 
   return (
     <div className="space-y-6">
@@ -85,28 +118,28 @@ export default function LearnerDashboardView({ onNavigateToMatching, onSelectTra
               <div className="bg-stone-50 border border-stone-100 p-3 rounded-xl">
                 <div className="text-[11px] text-stone-500 font-medium">Requests Sent</div>
                 <div className="text-xl font-extrabold text-stone-900 mt-1">
-                  {learner.learningJourney.requestsSent}
+                  {learningJourney?.requestsSent ?? 3}
                 </div>
               </div>
 
               <div className="bg-stone-50 border border-stone-100 p-3 rounded-xl">
                 <div className="text-[11px] text-stone-500 font-medium">Connections</div>
                 <div className="text-xl font-extrabold text-stone-900 mt-1">
-                  {learner.learningJourney.connections}
+                  {learningJourney?.connections ?? 2}
                 </div>
               </div>
 
               <div className="bg-stone-50 border border-stone-100 p-3 rounded-xl">
                 <div className="text-[11px] text-stone-500 font-medium">Sessions Attended</div>
                 <div className="text-xl font-extrabold text-stone-900 mt-1">
-                  {learner.learningJourney.sessionsAttended}
+                  {learningJourney?.sessionsAttended ?? 14}
                 </div>
               </div>
 
               <div className="bg-stone-50 border border-stone-100 p-3 rounded-xl">
                 <div className="text-[11px] text-stone-500 font-medium">Badges Earned</div>
                 <div className="text-xl font-extrabold text-stone-900 mt-1">
-                  {learner.learningJourney.badgesEarned}
+                  {learningJourney?.badgesEarned ?? 5}
                 </div>
               </div>
 
@@ -142,15 +175,20 @@ export default function LearnerDashboardView({ onNavigateToMatching, onSelectTra
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {learner.recommendations.map((rec) => (
+          {recommendations.map((rec) => (
             <div
               key={rec.id}
               className="border border-stone-200/80 rounded-2xl p-4 hover:border-emerald-300 hover:bg-stone-50/50 transition flex items-center justify-between gap-4"
             >
               <div className="flex items-center gap-3">
                 <img
-                  src={rec.image}
+                  src={getTraditionImage({ name: rec.tradition, image: rec.image })}
                   alt={rec.tradition}
+                  loading="lazy"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = getCategoryFallback('Music');
+                  }}
                   className="w-12 h-12 rounded-xl object-cover border border-stone-200"
                 />
                 <div>

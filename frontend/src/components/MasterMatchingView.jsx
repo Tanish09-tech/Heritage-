@@ -11,6 +11,7 @@ import {
   Send
 } from 'lucide-react';
 import { MASTER_PRACTITIONERS } from '../data/heritageData';
+import { api } from '../services/api';
 
 export default function MasterMatchingView({ onSelectTradition, traditions }) {
   const [activeSubTab, setActiveSubTab] = useState('FIND_MASTERS'); // 'FIND_MASTERS' or 'MY_CONNECTIONS'
@@ -24,10 +25,21 @@ export default function MasterMatchingView({ onSelectTradition, traditions }) {
     m.location.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleConnect = (id) => {
-    if (!connectedIds.includes(id)) {
-      setConnectedIds([...connectedIds, id]);
-      alert('Connection request sent to Master Practitioner!');
+  const handleConnect = async (masterId) => {
+    if (!connectedIds.includes(masterId)) {
+      setConnectedIds(prev => [...prev, masterId]);
+      const targetMaster = MASTER_PRACTITIONERS.find(m => m.id === masterId);
+      try {
+        await api.applyForMentorship({
+          practitionerId: masterId,
+          practitionerName: targetMaster?.name || 'Master Practitioner',
+          tradition: targetMaster?.tradition || 'Living Tradition',
+          learnerName: 'Aniket Deshmukh'
+        });
+      } catch (err) {
+        console.warn('Mentorship application sync to backend failed:', err);
+      }
+      alert(`Apprenticeship connection request sent to ${targetMaster?.name || 'Master Practitioner'}!`);
     }
   };
 

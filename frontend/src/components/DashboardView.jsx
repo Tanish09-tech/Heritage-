@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { Search, Filter, AlertTriangle, ShieldCheck, Activity, Users, MapPin, ChevronRight, BookOpen, Layers, Globe } from 'lucide-react';
+import { getTraditionImage, getCategoryFallback } from '../utils/imageResolver';
 
 export default function DashboardView({ traditions, onSelectTradition, onNavigateTab }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('ALL');
   const [selectedState, setSelectedState] = useState('ALL');
+  const [selectedCategory, setSelectedCategory] = useState('ALL');
+  const [selectedGender, setSelectedGender] = useState('ALL');
 
   // KPI Calculations
   const totalTraditions = traditions.length;
@@ -14,6 +17,7 @@ export default function DashboardView({ traditions, onSelectTradition, onNavigat
   const strongCount = traditions.filter(t => t.status === 'STRONG').length;
 
   const statesList = ['ALL', 'Maharashtra', 'Punjab', 'Gujarat', 'Delhi', 'Madhya Pradesh', 'Uttar Pradesh', 'Assam', 'Kerala', 'Himachal Pradesh'];
+  const categoriesList = ['ALL', 'Traditional Clothes', 'Art', 'Traditional Food', 'Traditional Festival', 'Oral Traditions'];
 
   const filteredTraditions = traditions.filter(t => {
     const matchesSearch = t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -23,7 +27,16 @@ export default function DashboardView({ traditions, onSelectTradition, onNavigat
                           t.marathiName.includes(searchQuery);
     const matchesStatus = selectedStatus === 'ALL' || t.status === selectedStatus;
     const matchesState = selectedState === 'ALL' || t.state.includes(selectedState.split(' ')[0]);
-    return matchesSearch && matchesStatus && matchesState;
+    const matchesCategory = selectedCategory === 'ALL' || t.category.toLowerCase() === selectedCategory.toLowerCase();
+    
+    let matchesGender = true;
+    if (selectedCategory === 'Traditional Clothes' && selectedGender !== 'ALL') {
+      matchesGender = t.gender ? t.gender.toLowerCase() === selectedGender.toLowerCase() : false;
+    } else if (selectedGender !== 'ALL') {
+      matchesGender = !t.gender || (t.gender && t.gender.toLowerCase() === selectedGender.toLowerCase());
+    }
+
+    return matchesSearch && matchesStatus && matchesState && matchesCategory && matchesGender;
   });
 
   return (
@@ -198,6 +211,31 @@ export default function DashboardView({ traditions, onSelectTradition, onNavigat
 
         </div>
 
+        {/* Category Filter Pills */}
+        <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-slate-100">
+          <span className="text-xs text-slate-600 font-semibold mr-1 flex items-center gap-1">
+            <Layers className="w-3.5 h-3.5 text-[#0f2a4a]" /> Category:
+          </span>
+          {categoriesList.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => {
+                setSelectedCategory(cat);
+                if (cat !== 'Traditional Clothes') {
+                  setSelectedGender('ALL');
+                }
+              }}
+              className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition cursor-pointer ${
+                selectedCategory === cat
+                  ? 'bg-[#0f2a4a] text-white shadow'
+                  : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200'
+              }`}
+            >
+              {cat === 'ALL' ? 'All Categories' : cat}
+            </button>
+          ))}
+        </div>
+
         {/* State Filter Pills */}
         <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-slate-100">
           <span className="text-xs text-slate-600 font-semibold mr-1 flex items-center gap-1">
@@ -207,7 +245,7 @@ export default function DashboardView({ traditions, onSelectTradition, onNavigat
             <button
               key={st}
               onClick={() => setSelectedState(st)}
-              className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition ${
+              className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition cursor-pointer ${
                 selectedState === st
                   ? 'bg-amber-500 text-slate-950 shadow'
                   : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200'
@@ -217,6 +255,42 @@ export default function DashboardView({ traditions, onSelectTradition, onNavigat
             </button>
           ))}
         </div>
+
+        {/* Gender Filter Pills - ONLY APPEARS WHEN TRADITIONAL CLOTHES IS SELECTED */}
+        {selectedCategory === 'Traditional Clothes' && (
+          <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-slate-100 animate-fadeIn">
+            <button
+              onClick={() => setSelectedGender('ALL')}
+              className={`px-3 py-1 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1 ${
+                selectedGender === 'ALL'
+                  ? 'bg-slate-900 text-white shadow'
+                  : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200'
+              }`}
+            >
+              <span>👔</span> All Attire
+            </button>
+            <button
+              onClick={() => setSelectedGender('Women')}
+              className={`px-3 py-1 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1 ${
+                selectedGender === 'Women'
+                  ? 'bg-amber-600 text-white shadow'
+                  : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200'
+              }`}
+            >
+              <span>👩</span> Women's Attire
+            </button>
+            <button
+              onClick={() => setSelectedGender('Men')}
+              className={`px-3 py-1 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1 ${
+                selectedGender === 'Men'
+                  ? 'bg-emerald-800 text-white shadow'
+                  : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200'
+              }`}
+            >
+              <span>👨</span> Men's Attire
+            </button>
+          </div>
+        )}
 
       </div>
 
@@ -228,11 +302,16 @@ export default function DashboardView({ traditions, onSelectTradition, onNavigat
             className="clean-card rounded-2xl overflow-hidden flex flex-col justify-between group transition-all duration-300 hover:-translate-y-1"
           >
             {/* Header Image & Badges */}
-            <div className="relative h-48 overflow-hidden">
+            <div className="relative h-64 sm:h-72 overflow-hidden">
               <img
-                src={tradition.image}
+                src={getTraditionImage(tradition)}
                 alt={tradition.name}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                loading="lazy"
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = getCategoryFallback(tradition.category, tradition.state);
+                }}
+                className="w-full h-full object-cover object-[center_20%] group-hover:scale-105 transition-transform duration-500"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent"></div>
               

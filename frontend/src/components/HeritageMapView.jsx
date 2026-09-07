@@ -9,6 +9,7 @@ import {
   Flame,
   Info
 } from 'lucide-react';
+import { getTraditionImage, getCategoryFallback } from '../utils/imageResolver';
 
 // Indian states data - Strictly containing the 9 active focus states
 export const INDIA_STATES_DATA = [
@@ -507,10 +508,11 @@ export default function HeritageMapView({ traditions, onSelectTradition }) {
                     >
                       {/* Avatar */}
                       <img 
-                        src={trad.image || '/images/hero.jpg'} 
+                        src={getTraditionImage(trad)} 
                         alt={trad.name} 
+                        loading="lazy"
                         className="w-10 h-10 rounded-lg object-cover shrink-0 border border-stone-200 shadow-2xs" 
-                        onError={(e) => { e.target.src = '/images/hero.jpg'; }}
+                        onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = getCategoryFallback(trad.category, trad.state); }}
                       />
 
                       {/* Info */}
@@ -575,10 +577,11 @@ export default function HeritageMapView({ traditions, onSelectTradition }) {
         <div className="bg-white p-5 rounded-2xl border border-stone-200 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <img 
-              src={selectedTradition.image || '/images/hero.jpg'} 
+              src={getTraditionImage(selectedTradition)} 
               alt={selectedTradition.name} 
+              loading="lazy"
               className="w-16 h-16 rounded-2xl object-cover border border-stone-200 shadow-xs shrink-0" 
-              onError={(e) => { e.target.src = '/images/hero.jpg'; }}
+              onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = getCategoryFallback(selectedTradition.category, selectedTradition.state); }}
             />
             <div>
               <div className="flex flex-wrap items-center gap-2">

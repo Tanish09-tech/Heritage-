@@ -61,6 +61,17 @@ The platform adapts its interface according to three primary user personas:
 - **Apprentice / Enthusiast (Shishya)**:
   - Learning roadmaps, skill badges, and direct application to master mentors.
 
+#### Pre-seeded Fixed Demo Credentials:
+> ⚠️ **Registration-First Enforcement**: New users must complete mandatory onboarding profile registration before logging in. Unregistered logins are blocked by the backend API (`POST /api/auth/login`) with HTTP 401.
+
+| Role | Name | Email | Password | Mandatory Onboarding Details |
+| :--- | :--- | :--- | :--- | :--- |
+| **Shishya 1** | Aniket Deshmukh | `shishya1@sanskriti.gov.in` | `password123` | **DOB**: `2002-05-15`, **State**: `Maharashtra`<br/>**Hobbies**: `Shahiri Powada recitation, Daf percussion, Historical Maratha Ballads` |
+| **Shishya 2** | Simran Kaur | `shishya2@sanskriti.gov.in` | `password123` | **DOB**: `2003-11-20`, **State**: `Punjab`<br/>**Hobbies**: `Phulkari folk embroidery, Giddha folk dance, Punjabi folk music` |
+| **Guru 1** | Shahir Tukaram Jagtap | `guru1@sanskriti.gov.in` | `password123` | **State**: `Maharashtra`, **DOB**: `1968-08-20`<br/>**Experience**: `28 Years of continuous Shahiri Akhada & Daf oral tradition`<br/>**Expertise**: `Shahiri Powada (Oral Ballads)` |
+| **Guru 2** | Ustad Harinder Singh | `guru2@sanskriti.gov.in` | `password123` | **State**: `Punjab`, **DOB**: `1965-03-12`<br/>**Experience**: `32 Years of traditional Gatka Shastar Vidiya & folk rhythms`<br/>**Expertise**: `Baisakhi & Gatka Martial Art` |
+| **Admin** | Dr. Rajesh Sharma | `admin@sanskriti.gov.in` | `adminpassword123` | **Role**: `AUTHORITY`, **State**: `Delhi` |
+
 ### 3. Cultural Officer Overview (`HeritageDashboardView.jsx`)
 - High-level KPIs: Total Monitored Traditions (78+), High-Risk Practices, Active Living Gurus, Documented Apprentices.
 - Regional breakdown of critical practices needing urgent stipends or documentation workshops.
@@ -71,7 +82,7 @@ The platform adapts its interface according to three primary user personas:
 - Category filtering:
   - Art (e.g. Warli Art, Gond Tribal Painting, Rogan Fabric Art)
   - Music (e.g. Dilli Gharana Classical Khayal, Sattriya Borgeet, Dhrupad)
-  - Dance (e.g. Kathakali, Lavani Folk Tradition, Dhangari Gaja, Koli Dance)
+  - Dance (e.g. Lavani Folk Tradition, Kathakali, Bhangra, Navratri Garba, Kathak, Nati, Bihu, Matki)
   - Craft (e.g. Purani Dilli Zardozi & Aari, Chamba Rumal, Bamboo Craft, Patan Patola)
   - Traditional Clothes (e.g. Paithani & Nauvari, Phulkari, Banarasi Katan, Muga Silk, Kasavu Mundu, Kullu Shawls)
   - Traditional Festivals (e.g. Baisakhi, Navratri Garba, Thrissur Pooram, Rongali Bihu, Dev Deepawali, Kullu Dussehra)
@@ -200,6 +211,28 @@ Optimized assets will be generated in the `frontend/dist/` directory.
 ```bash
 npm run preview
 ```
+
+---
+
+## 🐘 Backend Architecture: PostgreSQL & Local Disk Storage
+
+The platform features a production-grade **Node.js Express API backend** powered by a native **PostgreSQL Relational Database** (`pg` pool) and **Local Disk Storage** (`multer` engine):
+
+### 1. PostgreSQL Database Configuration (`postgresDb.js`)
+- **Database Host & Port**: `localhost:5432`
+- **Database Name**: `sanskriti_suraksha`
+- **Database Credentials**: User: `postgres`, Password: `kapil123`
+- **Tables Schema**:
+  - `users`: User authentication, roles (`LEARNER`, `PRACTITIONER`, `AUTHORITY`), and mandatory onboarding details.
+  - `traditions`: 45 focus state living traditions with spatial coordinates, vulnerability scores, and metadata.
+  - `matchmaking`: Gurukula master-to-apprentice mentorship connections and application states.
+  - `knowledge_vault`: Multimedia archival records (audio, video, transcript metadata).
+  - `validation_queue`: Community crowdsourced tradition submission review queue.
+
+### 2. Local Disk Storage Engine (`uploadRoutes.js`)
+- **Storage Engine**: Multer Disk Storage saving files directly to local disk directory `backend/uploads/`.
+- **Static Asset Endpoint**: `http://localhost:5000/uploads/<filename>`
+- **No AWS Cloud Dependency**: Keeps media storage 100% localized and self-contained.
 
 ---
 

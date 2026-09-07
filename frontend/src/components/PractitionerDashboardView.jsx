@@ -11,30 +11,56 @@ import {
   X 
 } from 'lucide-react';
 import { CURRENT_PRACTITIONER } from '../data/heritageData';
+import { api } from '../services/api';
 
 export default function PractitionerDashboardView({ currentUser }) {
   const initialPractitioner = {
+    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&q=80',
+    documentationFiles: 18,
+    learnersConnected: 4,
+    sessionsConducted: 32,
+    profileCompletion: 92,
+    learnerRequests: [
+      {
+        id: 'lr-1',
+        name: 'Aniket Deshmukh',
+        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
+        location: 'Pune, Maharashtra',
+        requestedDate: 'Yesterday',
+        status: 'PENDING'
+      }
+    ],
     ...CURRENT_PRACTITIONER,
-    name: currentUser?.name || CURRENT_PRACTITIONER.name,
-    location: currentUser?.state ? `${currentUser.state}, India` : CURRENT_PRACTITIONER.location,
-    tradition: currentUser?.expertTradition || CURRENT_PRACTITIONER.tradition,
-    experience: currentUser?.experience ? `${currentUser.experience}` : CURRENT_PRACTITIONER.experience,
+    name: currentUser?.name || CURRENT_PRACTITIONER?.name || 'Shahir Tukaram Jagtap',
+    location: currentUser?.state ? `${currentUser.state}, India` : (CURRENT_PRACTITIONER?.location || 'Pune, Maharashtra'),
+    tradition: currentUser?.expertTradition || CURRENT_PRACTITIONER?.tradition || 'Shahiri Powada Balladry',
+    experience: currentUser?.experience ? `${currentUser.experience}` : (CURRENT_PRACTITIONER?.experience || '35+ Years'),
     dob: currentUser?.dob || '1968-08-20'
   };
 
   const [practitioner, setPractitioner] = useState(initialPractitioner);
-  const [requests, setRequests] = useState(CURRENT_PRACTITIONER.learnerRequests);
+  const [requests, setRequests] = useState(initialPractitioner.learnerRequests || []);
 
-  const handleAccept = (id) => {
+  const handleAccept = async (id) => {
     setRequests(prev => prev.map(r => r.id === id ? { ...r, status: 'ACCEPTED' } : r));
     setPractitioner(prev => ({
       ...prev,
       learnersConnected: prev.learnersConnected + 1
     }));
+    try {
+      await api.respondToLearnerRequest(id, 'ACCEPTED');
+    } catch (err) {
+      console.warn('Backend sync for apprentice accept failed:', err);
+    }
   };
 
-  const handleReject = (id) => {
+  const handleReject = async (id) => {
     setRequests(prev => prev.filter(r => r.id !== id));
+    try {
+      await api.respondToLearnerRequest(id, 'REJECTED');
+    } catch (err) {
+      console.warn('Backend sync for apprentice reject failed:', err);
+    }
   };
 
   return (

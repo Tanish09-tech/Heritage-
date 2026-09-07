@@ -1,5 +1,6 @@
 import React from 'react';
 import { X, MapPin, AlertTriangle } from 'lucide-react';
+import { getTraditionImage, getCategoryFallback } from '../utils/imageResolver';
 
 export default function TraditionModal({ tradition, onClose, onNavigateTab }) {
   if (!tradition) return null;
@@ -19,9 +20,14 @@ export default function TraditionModal({ tradition, onClose, onNavigateTab }) {
         {/* Header Banner */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 border-b border-slate-200 pb-4">
           <img
-            src={tradition.image}
+            src={getTraditionImage(tradition)}
             alt={tradition.name}
-            className="w-24 h-24 rounded-2xl object-cover border-2 border-[#0f2a4a] shadow"
+            loading="lazy"
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = getCategoryFallback(tradition.category, tradition.state);
+            }}
+            className="w-32 h-32 sm:w-36 sm:h-36 rounded-2xl object-cover object-[center_20%] border-2 border-[#0f2a4a] shadow shrink-0"
           />
           <div className="space-y-1">
             <div className="flex items-center gap-2">
@@ -42,9 +48,17 @@ export default function TraditionModal({ tradition, onClose, onNavigateTab }) {
         {/* Description */}
         <div className="space-y-2">
           <h3 className="font-cinzel text-xs font-bold text-slate-800 uppercase tracking-wider">Historical Overview & Practice</h3>
-          <p className="text-xs text-slate-800 leading-relaxed font-sans bg-slate-50 p-4 rounded-xl border border-slate-200">
-            {tradition.description}
-          </p>
+          <div className="text-xs text-slate-800 leading-relaxed font-sans bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+            {typeof tradition.description === 'string' && tradition.description.includes('\n') ? (
+              tradition.description.split(/\n\s*\n/).map((para, idx) => (
+                <p key={idx} className="leading-relaxed">
+                  {para.trim()}
+                </p>
+              ))
+            ) : (
+              <p className="leading-relaxed">{tradition.description}</p>
+            )}
+          </div>
         </div>
 
         {/* Transmission Indicators Grid */}

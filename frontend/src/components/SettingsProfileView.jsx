@@ -23,11 +23,13 @@ import {
   BadgeCheck
 } from 'lucide-react';
 
+import { useLanguage } from '../context/LanguageContext';
+
 export default function SettingsProfileView({ currentRole, currentUser, onLogout }) {
+  const { language, changeLanguage, t, languages } = useLanguage();
   const [activeTab, setActiveTab] = useState('PROFILE'); // 'PROFILE' | 'PREFERENCES' | 'SECURITY'
   const [alertPref, setAlertPref] = useState(true);
   const [smsPref, setSmsPref] = useState(true);
-  const [language, setLanguage] = useState('English');
 
   // 1. Shishya (Learner) Complete Information
   const shishyaProfile = {
@@ -199,10 +201,10 @@ export default function SettingsProfileView({ currentRole, currentUser, onLogout
           {/* Quick Logout / Switch Account */}
           <button
             onClick={onLogout}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 text-white text-xs font-semibold shadow-xs transition"
+            className="px-4 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 font-bold text-xs border border-red-200 transition flex items-center gap-1.5 cursor-pointer shadow-xs"
           >
             <LogOut className="w-3.5 h-3.5" />
-            <span>Sign Out / Switch</span>
+            <span>Sign Out</span>
           </button>
 
         </div>
@@ -536,13 +538,14 @@ export default function SettingsProfileView({ currentRole, currentUser, onLogout
               <div className="font-bold text-xs text-stone-900">Preferred Display Language</div>
               <select 
                 value={language}
-                onChange={(e) => setLanguage(e.target.value)}
-                className="w-full text-xs p-2.5 rounded-xl bg-white border border-stone-200 focus:ring-1 focus:ring-[#104333]"
+                onChange={(e) => changeLanguage(e.target.value)}
+                className="w-full text-xs p-2.5 rounded-xl bg-white border border-stone-200 focus:ring-1 focus:ring-[#104333] cursor-pointer"
               >
-                <option value="English">English (India)</option>
-                <option value="Marathi">मराठी (Marathi)</option>
-                <option value="Hindi">हिन्दी (Hindi)</option>
-                <option value="Sanskrit">संस्कृतम् (Sanskrit)</option>
+                {languages.map((lang) => (
+                  <option key={lang.code} value={lang.code}>
+                    {lang.flag} {lang.native}
+                  </option>
+                ))}
               </select>
             </div>
 

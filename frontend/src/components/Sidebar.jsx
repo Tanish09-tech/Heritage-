@@ -14,52 +14,56 @@ import {
   Sparkles
 } from 'lucide-react';
 
+import { useLanguage } from '../context/LanguageContext';
+
 export default function Sidebar({ activeView, setActiveView, onLogout, currentRole }) {
+  const { t } = useLanguage();
+
   // Dynamic Role-based navigation items filtering
   const getMenuItems = () => {
     // 1. Shishya (Learner) Role: NO Admin Dashboard, NO Guru Portal, NO Validation Queue
     if (currentRole === 'LEARNER') {
       return [
-        { id: 'LEARNER_DASHBOARD', label: 'Shishya Portal', icon: GraduationCap },
-        { id: 'MAP', label: 'Heritage Map', icon: MapPin },
-        { id: 'EXPLORER', label: 'Traditions', icon: BookOpen },
-        { id: 'AI_ANALYSIS', label: 'AI Heritage Insights', icon: Activity },
-        { id: 'RECOMMENDATIONS', label: 'Mentorship Matches', icon: Lightbulb },
-        { id: 'SETTINGS', label: 'Settings', icon: Settings },
+        { id: 'LEARNER_DASHBOARD', label: t('shishyaPortal'), icon: GraduationCap },
+        { id: 'MAP', label: t('map'), icon: MapPin },
+        { id: 'EXPLORER', label: t('explorer'), icon: BookOpen },
+        { id: 'AI_ANALYSIS', label: t('aiInsights'), icon: Activity },
+        { id: 'RECOMMENDATIONS', label: t('matchmaker'), icon: Lightbulb },
+        { id: 'SETTINGS', label: t('settings'), icon: Settings },
       ];
     }
 
     // 2. Guru (Practitioner) Role: NO Admin Dashboard, NO Shishya Portal, NO Validation Queue
     if (currentRole === 'PRACTITIONER') {
       return [
-        { id: 'PRACTITIONER_DASHBOARD', label: 'Guru Portal', icon: Users },
-        { id: 'MAP', label: 'Heritage Map', icon: MapPin },
-        { id: 'EXPLORER', label: 'Traditions', icon: BookOpen },
-        { id: 'DOCUMENTATION', label: 'Documentation Vault', icon: FileText },
-        { id: 'RECOMMENDATIONS', label: 'Interventions', icon: Lightbulb },
-        { id: 'SETTINGS', label: 'Settings', icon: Settings },
+        { id: 'PRACTITIONER_DASHBOARD', label: t('guruPortal'), icon: Users },
+        { id: 'MAP', label: t('map'), icon: MapPin },
+        { id: 'EXPLORER', label: t('explorer'), icon: BookOpen },
+        { id: 'DOCUMENTATION', label: t('knowledgeVault'), icon: FileText },
+        { id: 'RECOMMENDATIONS', label: t('aiInsights'), icon: Lightbulb },
+        { id: 'SETTINGS', label: t('settings'), icon: Settings },
       ];
     }
 
     // 3. Admin (Authority) Role: NO Guru Portal, NO Shishya Portal
     return [
-      { id: 'DASHBOARD', label: 'Admin Dashboard', icon: LayoutDashboard },
-      { id: 'MAP', label: 'Heritage Map', icon: MapPin },
-      { id: 'EXPLORER', label: 'Traditions', icon: BookOpen },
-      { id: 'AI_ANALYSIS', label: 'AI Early Warning', icon: Activity },
-      { id: 'DOCUMENTATION', label: 'Documentation Vault', icon: FileText },
-      { id: 'VALIDATION', label: 'Validation Queue', icon: ShieldCheck },
-      { id: 'RECOMMENDATIONS', label: 'Recommendations', icon: Lightbulb },
-      { id: 'SETTINGS', label: 'Settings', icon: Settings },
+      { id: 'DASHBOARD', label: t('adminPortal'), icon: LayoutDashboard },
+      { id: 'MAP', label: t('map'), icon: MapPin },
+      { id: 'EXPLORER', label: t('explorer'), icon: BookOpen },
+      { id: 'AI_ANALYSIS', label: t('aiInsights'), icon: Activity },
+      { id: 'DOCUMENTATION', label: t('knowledgeVault'), icon: FileText },
+      { id: 'VALIDATION', label: t('validationQueue'), icon: ShieldCheck },
+      { id: 'RECOMMENDATIONS', label: t('aiInsights'), icon: Lightbulb },
+      { id: 'SETTINGS', label: t('settings'), icon: Settings },
     ];
   };
 
   const menuItems = getMenuItems();
 
   const getRoleBadge = () => {
-    if (currentRole === 'LEARNER') return { label: 'Shishya (Apprentice)', color: 'text-emerald-400' };
-    if (currentRole === 'PRACTITIONER') return { label: 'Guru (Master)', color: 'text-amber-400' };
-    return { label: 'Admin (Authority)', color: 'text-indigo-400' };
+    if (currentRole === 'LEARNER') return { label: t('shishya'), color: 'text-emerald-400' };
+    if (currentRole === 'PRACTITIONER') return { label: t('guru'), color: 'text-amber-400' };
+    return { label: t('admin'), color: 'text-indigo-400' };
   };
 
   const roleInfo = getRoleBadge();
@@ -115,7 +119,7 @@ export default function Sidebar({ activeView, setActiveView, onLogout, currentRo
           className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium text-stone-300 hover:bg-[#13382e] hover:text-red-300 transition"
         >
           <LogOut className="w-4 h-4 text-stone-400" />
-          <span>Sign Out / Switch Role</span>
+          <span>Sign Out</span>
         </button>
       </div>
     </aside>
