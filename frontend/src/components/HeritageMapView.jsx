@@ -75,7 +75,7 @@ export const INDIA_STATES_DATA = [
     aliases: ["Kerala", "KL"],
     zone: "SOUTH",
     code: "KL",
-    center: { x: 29.2, y: 94.0 }
+    center: { x: 29.2, y: 88.0 }
   },
   {
     id: "HP",
@@ -128,13 +128,17 @@ export default function HeritageMapView({ traditions, onSelectTradition }) {
       .filter(Boolean);
   }, [traditions]);
 
-  // Current active state object
-  const activeStateName = hoveredState || selectedState;
+  // Current active state object strictly follows selectedState
   const activeStateObj = useMemo(() => {
-    return matchStateObject(activeStateName) || INDIA_STATES_DATA[0];
-  }, [activeStateName]);
+    return matchStateObject(selectedState) || INDIA_STATES_DATA[0];
+  }, [selectedState]);
 
-  // Traditions belonging to the active state
+  // Display state for header/badges (shows hovered or selected)
+  const displayStateObj = useMemo(() => {
+    return matchStateObject(hoveredState || selectedState) || activeStateObj;
+  }, [hoveredState, selectedState, activeStateObj]);
+
+  // Traditions belonging to the active selected state
   const stateTraditions = useMemo(() => {
     return allTraditions.filter(t => t.stateObj.id === activeStateObj.id);
   }, [allTraditions, activeStateObj]);
@@ -190,7 +194,6 @@ export default function HeritageMapView({ traditions, onSelectTradition }) {
     let minDistance = Infinity;
 
     INDIA_STATES_DATA.forEach((st) => {
-      // Zone filter check
       if (selectedZone !== 'ALL' && st.zone !== selectedZone) return;
       const dist = Math.hypot(clickX - st.center.x, clickY - st.center.y);
       if (dist < minDistance) {
@@ -199,8 +202,8 @@ export default function HeritageMapView({ traditions, onSelectTradition }) {
       }
     });
 
-    // Proximity threshold: only select if close enough to one of the 9 states
-    if (closest && minDistance < 13) {
+    // Proximity threshold: select closest state when clicking on map
+    if (closest && minDistance < 25) {
       handleStateSelect(closest.name);
     }
   };
@@ -226,7 +229,7 @@ export default function HeritageMapView({ traditions, onSelectTradition }) {
               </span>
             </div>
             <p className="text-xs text-stone-500">
-              Living cultural cartography across 9 focus states • Select any state on the map to inspect living traditions
+              Living cultural cartography across 9 focus states • Click any state on the map to inspect its living traditions
             </p>
           </div>
         </div>
@@ -292,7 +295,7 @@ export default function HeritageMapView({ traditions, onSelectTradition }) {
           <div 
             ref={mapContainerRef}
             onClick={handleMapClick}
-            className="relative w-full max-w-[620px] aspect-[701/788] cursor-crosshair rounded-2xl overflow-visible select-none transition-all duration-300 group"
+            className="relative w-full max-w-[620px] aspect-[701/788] cursor-pointer rounded-2xl overflow-visible select-none transition-all duration-300 group"
           >
             {/* The Authentic Map Image */}
             <img 
@@ -302,12 +305,12 @@ export default function HeritageMapView({ traditions, onSelectTradition }) {
               draggable="false"
             />
 
-            {/* Zone Filter Dimming Mask (if a specific zone is selected) */}
+            {/* Zone Filter Dimming Mask */}
             {selectedZone !== 'ALL' && (
               <div className="absolute inset-0 rounded-2xl pointer-events-none bg-stone-900/10 transition-opacity duration-300" />
             )}
 
-            {/* State Badges and Hotspot Targets for the 9 states */}
+            {/* Clean State Markers for the 9 states */}
             {INDIA_STATES_DATA.map((st) => {
               const isSelected = activeStateObj.id === st.id;
               const isHovered = hoveredState === st.name;
@@ -336,102 +339,32 @@ export default function HeritageMapView({ traditions, onSelectTradition }) {
                     </div>
                   )}
 
-                  {/* State Heritage Marker */}
-                  {count > 0 ? (
-                    <div className={`relative flex items-center justify-center transition-transform duration-200 ${
-                      isSelected 
-                        ? 'scale-125 z-30' 
-                        : isHovered 
-                        ? 'scale-115 z-20' 
-                        : 'hover:scale-110'
-                    }`}>
-                      <div className={`px-2 py-0.5 rounded-full text-[10px] font-black flex items-center gap-1 shadow-md border transition-colors ${
-                        isSelected
-                          ? 'bg-[#2e3e55] text-amber-300 border-amber-400 ring-2 ring-amber-400/50'
-                          : isHovered
-                          ? 'bg-[#2563eb] text-white border-white ring-2 ring-blue-300'
-                          : 'bg-white/90 text-stone-800 border-stone-300 hover:bg-[#2e3e55] hover:text-white'
-                      }`}>
-                        <Sparkles className="w-2.5 h-2.5 text-amber-400 shrink-0" />
-                        <span>{count}</span>
-                      </div>
-                    </div>
-                  ) : (
-                    /* Subtle Dot for state */
-                    <div className={`w-3.5 h-3.5 rounded-full border transition-all ${
+                  {/* Clean State Heritage Marker Badge */}
+                  <div className={`relative flex items-center justify-center transition-transform duration-200 ${
+                    isSelected 
+                      ? 'scale-125 z-30' 
+                      : isHovered 
+                      ? 'scale-115 z-20' 
+                      : 'hover:scale-110'
+                  }`}>
+                    <div className={`px-2.5 py-1 rounded-full text-[11px] font-extrabold flex items-center gap-1.5 shadow-md border transition-all ${
                       isSelected
-                        ? 'bg-amber-500 border-white ring-2 ring-amber-400 scale-125'
+                        ? 'bg-[#2e3e55] text-amber-300 border-amber-400 ring-2 ring-amber-400/50'
                         : isHovered
-                        ? 'bg-blue-600 border-white scale-125'
-                        : 'bg-stone-800/40 hover:bg-stone-800 border-white/80'
-                    }`} />
-                  )}
-
+                        ? 'bg-[#2563eb] text-white border-white ring-2 ring-blue-300'
+                        : 'bg-white/95 text-stone-800 border-stone-300 hover:bg-[#2e3e55] hover:text-white'
+                    }`}>
+                      <Sparkles className="w-3 h-3 text-amber-400 shrink-0" />
+                      <span>{st.name}</span>
+                      <span className="bg-amber-400/30 text-amber-900 px-1.5 py-0.2 rounded-full text-[10px] font-black">
+                        {count}
+                      </span>
+                    </div>
+                  </div>
 
                 </div>
               );
             })}
-
-            {/* Individual Tradition Pins for the Selected Active State */}
-            <div className="absolute inset-0 pointer-events-none">
-              {stateTraditions.map((trad, idx) => {
-                const isSelected = selectedPinId === trad.id;
-                const isCritical = trad.status === 'CRITICAL';
-                const isVulnerable = trad.status === 'VULNERABLE';
-
-                // Scatter tradition pins neatly around the state center
-                const offsets = [
-                  { x: 0, y: -2.5 },
-                  { x: -3.8, y: -0.5 },
-                  { x: 3.8, y: -0.5 },
-                  { x: -3.0, y: 3.5 },
-                  { x: 3.0, y: 3.5 },
-                  { x: 0, y: 4.8 },
-                  { x: -4.5, y: -4.0 },
-                  { x: 4.5, y: -4.0 }
-                ];
-                const offset = offsets[idx % offsets.length];
-
-                const posX = Math.min(96, Math.max(4, activeStateObj.center.x + offset.x));
-                const posY = Math.min(96, Math.max(4, activeStateObj.center.y + offset.y));
-
-                const pinColor = isCritical 
-                  ? 'text-red-600 fill-red-500' 
-                  : isVulnerable 
-                  ? 'text-amber-500 fill-amber-400' 
-                  : 'text-emerald-600 fill-emerald-500';
-
-                return (
-                  <div
-                    key={trad.id}
-                    style={{ left: `${posX}%`, top: `${posY}%` }}
-                    className="absolute -translate-x-1/2 -translate-y-full pointer-events-auto cursor-pointer group z-30 transition-transform duration-200 hover:scale-125"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedPinId(trad.id);
-                    }}
-                  >
-                    <div className="relative flex flex-col items-center">
-                      <div className={`p-0.5 rounded-full transition-all ${
-                        isSelected 
-                          ? 'ring-4 ring-amber-400 ring-offset-2 ring-offset-white animate-bounce-short' 
-                          : 'group-hover:ring-2 group-hover:ring-white'
-                      }`}>
-                        <MapPin className={`w-7 h-7 ${pinColor} drop-shadow-lg filter`} />
-                      </div>
-
-                      {/* Small Center Dot */}
-                      <span className="absolute top-2 w-2.5 h-2.5 bg-white rounded-full flex items-center justify-center shadow-xs">
-                        <span className={`w-1.5 h-1.5 rounded-full ${
-                          isCritical ? 'bg-red-600' : isVulnerable ? 'bg-amber-600' : 'bg-emerald-600'
-                        }`} />
-                      </span>
-
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
 
             {/* Bottom-Right Stamp */}
             <div className="absolute bottom-2 right-2 pointer-events-none bg-white/80 backdrop-blur-xs px-2.5 py-1 rounded-md border border-stone-200 text-[9px] font-bold text-stone-500 tracking-wider uppercase">
