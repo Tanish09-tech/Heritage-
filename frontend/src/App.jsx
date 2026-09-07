@@ -140,7 +140,7 @@ export default function App() {
     }
   };
 
-  const handleRoleSelection = (roleId, targetView) => {
+  const handleRoleSelection = async (roleId, targetView) => {
     setIsRoleModalOpen(false);
     if (roleId === 'AUTHORITY') {
       setCurrentRole('AUTHORITY');
@@ -148,19 +148,28 @@ export default function App() {
       return;
     }
 
-    // Check if user already has completed details for this role
-    if (currentUser && currentUser.role === roleId && currentUser.profileCompleted) {
+    // Check if current user already has completed details
+    if (currentUser && (currentUser.role === roleId || currentUser.profileCompleted)) {
       setCurrentRole(roleId);
       handleNavigateView(targetView || (roleId === 'LEARNER' ? 'LEARNER_DASHBOARD' : 'PRACTITIONER_DASHBOARD'));
       return;
     }
 
-    // Shishya or Guru requires mandatory details to be filled before accessing dashboard!
     const defaultEmail = roleId === 'LEARNER' ? 'shishya1@sanskriti.gov.in' : 'guru1@sanskriti.gov.in';
+
+    // Check backend if account is already registered with completed profile
+    try {
+      const existingUser = await api.loginUser({ email: defaultEmail, role: roleId });
+      if (existingUser && existingUser.profileCompleted) {
+        handleLoginSuccess(roleId, targetView, existingUser);
+        return;
+      }
+    } catch (e) {}
+
     const newUser = {
       name: roleId === 'LEARNER' ? 'Aniket Deshmukh' : 'Shahir Tukaram Jagtap',
       role: roleId,
-      email: (currentUser?.role === roleId ? currentUser?.email : '') || defaultEmail,
+      email: defaultEmail,
       profileCompleted: false
     };
     setCurrentRole(roleId);
@@ -169,21 +178,30 @@ export default function App() {
     setIsProfileModalOpen(true);
   };
 
-  const handleSuccessfulAuth = (roleId, targetView) => {
+  const handleSuccessfulAuth = async (roleId, targetView, userEmail) => {
     setIsAuthModalOpen(false);
     if (roleId === 'AUTHORITY') {
       handleLoginSuccess('AUTHORITY', targetView || 'DASHBOARD', {
-        name: 'Ministry Heritage Authority',
+        name: 'Dr. Rajesh Sharma',
         role: 'AUTHORITY',
-        email: 'admin.sanskriti@gov.in',
+        email: 'admin@sanskriti.gov.in',
         profileCompleted: true
       });
       return;
     }
 
-    // For Shishya and Guru, open mandatory details modal immediately
+    const defaultEmail = userEmail || (roleId === 'LEARNER' ? 'shishya1@sanskriti.gov.in' : 'guru1@sanskriti.gov.in');
+
+    // Check backend if account is already registered with completed profile
+    try {
+      const existingUser = await api.loginUser({ email: defaultEmail, role: roleId });
+      if (existingUser && existingUser.profileCompleted) {
+        handleLoginSuccess(roleId, targetView, existingUser);
+        return;
+      }
+    } catch (e) {}
+
     const defaultName = roleId === 'LEARNER' ? 'Aniket Deshmukh' : 'Shahir Tukaram Jagtap';
-    const defaultEmail = roleId === 'LEARNER' ? 'shishya1@sanskriti.gov.in' : 'guru1@sanskriti.gov.in';
     const initialUser = {
       name: defaultName,
       role: roleId,
@@ -254,6 +272,7 @@ export default function App() {
 
     setCurrentRole(roleKey);
     setCurrentUser(userObj);
+    setIsProfileModalOpen(false);
     setActiveView(destView);
 
     // Save session in localStorage so user doesn't get automatically logged out or asked for login again
