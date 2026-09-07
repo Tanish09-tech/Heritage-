@@ -1,4 +1,5 @@
 export const TRADITION_CATEGORIES = [
+  "All",
   "Art",
   "Traditional Clothes",
   "Traditional Festival",
