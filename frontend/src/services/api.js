@@ -221,6 +221,17 @@ class ApiService {
     }
   }
 
+  async getApplications(params = {}) {
+    try {
+      const query = new URLSearchParams(params).toString();
+      const endpoint = query ? `/match/applications?${query}` : '/match/applications';
+      const res = await this.request(endpoint);
+      return res.applications || [];
+    } catch {
+      return [];
+    }
+  }
+
   async applyForMentorship(applicationData) {
     try {
       const res = await this.request('/match/apply', {
@@ -246,6 +257,28 @@ class ApiService {
       return res.application;
     } catch {
       return { id, status };
+    }
+  }
+
+  async getMessages(applicationId) {
+    try {
+      const res = await this.request(`/match/applications/${applicationId}/messages`);
+      return res;
+    } catch {
+      return { status: 'PENDING', messages: [] };
+    }
+  }
+
+  async sendMessage(applicationId, messageData) {
+    try {
+      const res = await this.request(`/match/applications/${applicationId}/messages`, {
+        method: 'POST',
+        body: JSON.stringify(messageData)
+      });
+      return res;
+    } catch (err) {
+      console.warn('API error sending message:', err.message);
+      throw err;
     }
   }
 
