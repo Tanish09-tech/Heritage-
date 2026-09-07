@@ -143,8 +143,12 @@ export default function App() {
   const handleRoleSelection = async (roleId, targetView) => {
     setIsRoleModalOpen(false);
     if (roleId === 'AUTHORITY') {
-      setCurrentRole('AUTHORITY');
-      if (targetView) handleNavigateView(targetView);
+      handleLoginSuccess('AUTHORITY', targetView || 'DASHBOARD', {
+        name: 'Dr. Rajesh Sharma',
+        role: 'AUTHORITY',
+        email: 'admin@sanskriti.gov.in',
+        profileCompleted: true
+      });
       return;
     }
 
@@ -160,22 +164,25 @@ export default function App() {
     // Check backend if account is already registered with completed profile
     try {
       const existingUser = await api.loginUser({ email: defaultEmail, role: roleId });
-      if (existingUser && existingUser.profileCompleted) {
-        handleLoginSuccess(roleId, targetView, existingUser);
+      if (existingUser) {
+        handleLoginSuccess(roleId, targetView, { ...existingUser, profileCompleted: true });
         return;
       }
     } catch (e) {}
 
-    const newUser = {
+    // Existing demo user fallback: demo accounts already have mandatory details
+    const defaultUser = {
       name: roleId === 'LEARNER' ? 'Aniket Deshmukh' : 'Shahir Tukaram Jagtap',
       role: roleId,
       email: defaultEmail,
-      profileCompleted: false
+      dob: roleId === 'LEARNER' ? '2002-05-15' : '1968-08-20',
+      state: 'Maharashtra',
+      hobbies: roleId === 'LEARNER' ? 'Shahiri Powada recitation, Daf percussion' : undefined,
+      experience: roleId === 'PRACTITIONER' ? '28 Years of continuous Shahiri Akhada' : undefined,
+      expertTradition: roleId === 'PRACTITIONER' ? 'Shahiri Powada (Oral Ballads)' : undefined,
+      profileCompleted: true
     };
-    setCurrentRole(roleId);
-    setCurrentUser(newUser);
-    setPendingTargetView(targetView || (roleId === 'LEARNER' ? 'LEARNER_DASHBOARD' : 'PRACTITIONER_DASHBOARD'));
-    setIsProfileModalOpen(true);
+    handleLoginSuccess(roleId, targetView, defaultUser);
   };
 
   const handleSuccessfulAuth = async (roleId, targetView, userEmail) => {
@@ -195,23 +202,25 @@ export default function App() {
     // Check backend if account is already registered with completed profile
     try {
       const existingUser = await api.loginUser({ email: defaultEmail, role: roleId });
-      if (existingUser && existingUser.profileCompleted) {
-        handleLoginSuccess(roleId, targetView, existingUser);
+      if (existingUser) {
+        handleLoginSuccess(roleId, targetView, { ...existingUser, profileCompleted: true });
         return;
       }
     } catch (e) {}
 
-    const defaultName = roleId === 'LEARNER' ? 'Aniket Deshmukh' : 'Shahir Tukaram Jagtap';
-    const initialUser = {
-      name: defaultName,
+    // Existing demo user fallback: demo accounts already have mandatory details
+    const defaultUser = {
+      name: roleId === 'LEARNER' ? 'Aniket Deshmukh' : 'Shahir Tukaram Jagtap',
       role: roleId,
       email: defaultEmail,
-      profileCompleted: false
+      dob: roleId === 'LEARNER' ? '2002-05-15' : '1968-08-20',
+      state: 'Maharashtra',
+      hobbies: roleId === 'LEARNER' ? 'Shahiri Powada recitation, Daf percussion' : undefined,
+      experience: roleId === 'PRACTITIONER' ? '28 Years of continuous Shahiri Akhada' : undefined,
+      expertTradition: roleId === 'PRACTITIONER' ? 'Shahiri Powada (Oral Ballads)' : undefined,
+      profileCompleted: true
     };
-    setCurrentRole(roleId);
-    setCurrentUser(initialUser);
-    setPendingTargetView(targetView || (roleId === 'LEARNER' ? 'LEARNER_DASHBOARD' : 'PRACTITIONER_DASHBOARD'));
-    setIsProfileModalOpen(true);
+    handleLoginSuccess(roleId, targetView, defaultUser);
   };
 
   const handleProfileComplete = (completedData) => {
@@ -511,7 +520,7 @@ export default function App() {
 
       {/* Mandatory Profile Details Modal for Shishya & Guru */}
       <ProfileDetailsModal
-        isOpen={isProfileModalOpen || (Boolean(currentUser) && (currentUser.role === 'LEARNER' || currentUser.role === 'PRACTITIONER') && !currentUser.profileCompleted)}
+        isOpen={isProfileModalOpen && Boolean(currentUser) && !currentUser.profileCompleted}
         role={currentUser?.role || currentRole}
         initialData={currentUser || {}}
         onComplete={handleProfileComplete}

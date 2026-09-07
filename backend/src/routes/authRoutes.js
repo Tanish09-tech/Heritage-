@@ -164,10 +164,15 @@ router.post('/login', async (req, res) => {
       });
     }
 
+    const formattedUser = {
+      ...user,
+      profileCompleted: user.profileCompleted ?? user.profile_completed ?? true
+    };
+
     return res.json({
       success: true,
       message: 'Login authenticated successfully',
-      user
+      user: formattedUser
     });
   } catch (err) {
     console.error('Error in /api/auth/login:', err);

@@ -440,7 +440,37 @@ class JSONDatabase {
     return list.find(item => item.id === id || String(item.id) === String(id)) || null;
   }
 
+  saveUser(userObj) {
+    if (!this.data.users) this.data.users = [];
+    const normalizedEmail = userObj.email?.toLowerCase();
+    const idx = this.data.users.findIndex(u => 
+      u.email?.toLowerCase() === normalizedEmail && (!userObj.role || u.role === userObj.role)
+    );
+    if (idx !== -1) {
+      this.data.users[idx] = {
+        ...this.data.users[idx],
+        ...userObj,
+        profileCompleted: true
+      };
+      this.persist();
+      return this.data.users[idx];
+    } else {
+      const newUser = {
+        id: userObj.id || `user-${Date.now()}`,
+        ...userObj,
+        profileCompleted: true,
+        createdAt: new Date().toISOString()
+      };
+      this.data.users.unshift(newUser);
+      this.persist();
+      return newUser;
+    }
+  }
+
   create(collection, item) {
+    if (collection === 'users') {
+      return this.saveUser(item);
+    }
     if (!this.data[collection]) {
       this.data[collection] = [];
     }
