@@ -294,6 +294,19 @@ export default function App() {
     }
   };
 
+  const handleUpdateProfile = (updatedProfile) => {
+    setCurrentUser(updatedProfile);
+    api.registerUser(updatedProfile).catch(err => {
+      console.warn('Backend user profile update error:', err.message);
+    });
+
+    try {
+      localStorage.setItem('sanskriti_user', JSON.stringify(updatedProfile));
+    } catch (err) {
+      console.error('Failed to update session profile:', err);
+    }
+  };
+
   const handleLandingAction = () => {
     if (currentUser) {
       const destView = currentRole === 'LEARNER' ? 'LEARNER_DASHBOARD' : (currentRole === 'PRACTITIONER' ? 'PRACTITIONER_DASHBOARD' : 'DASHBOARD');
@@ -498,6 +511,7 @@ export default function App() {
                 currentRole={currentRole}
                 currentUser={currentUser}
                 onLogout={handleLogout}
+                onUpdateProfile={handleUpdateProfile}
               />
             )}
 

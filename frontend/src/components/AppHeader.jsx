@@ -155,7 +155,7 @@ export default function AppHeader({
         >
           <div className="relative">
             <img
-              src="/images/powada.jpg"
+              src={currentUser?.avatar || '/images/powada.jpg'}
               alt="Profile"
               className="w-8 h-8 rounded-full object-cover ring-2 ring-emerald-600/30"
             />
