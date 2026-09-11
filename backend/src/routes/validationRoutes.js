@@ -1,12 +1,13 @@
 import { Router } from 'express';
 import { db } from '../services/db.js';
 import { requireRole } from '../middleware/rbac.js';
+import { verifyToken, optionalToken } from '../middleware/authMiddleware.js';
 import pool from '../services/postgresDb.js';
 
 const router = Router();
 
 // GET /api/validation - List all validation queue items
-router.get('/', async (req, res) => {
+router.get('/', optionalToken, async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM validation_queue ORDER BY created_at DESC');
     if (result.rows.length > 0) {
@@ -19,8 +20,8 @@ router.get('/', async (req, res) => {
   return res.json({ success: true, count: queue.length, queue });
 });
 
-// POST /api/validation - Add crowdsourced validation item
-router.post('/', async (req, res) => {
+// POST /api/validation - Add crowdsourced validation item (Requires JWT Auth)
+router.post('/', verifyToken, async (req, res) => {
   try {
     const { traditionName, submittedBy, field, dataSummary, evidence, state } = req.body;
     if (!traditionName || !submittedBy) {
@@ -62,8 +63,8 @@ router.post('/', async (req, res) => {
   }
 });
 
-// PUT /api/validation/:id/verify - Approve item (Requires AUTHORITY role)
-router.put('/:id/verify', requireRole(['AUTHORITY']), async (req, res) => {
+// PUT /api/validation/:id/verify - Approve item (Requires JWT Auth & AUTHORITY role)
+router.put('/:id/verify', verifyToken, requireRole(['AUTHORITY']), async (req, res) => {
   try {
     try {
       await pool.query(`

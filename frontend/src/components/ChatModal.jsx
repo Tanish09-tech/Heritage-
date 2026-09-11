@@ -1,6 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Send, Lock, CheckCircle2, Clock, MessageSquare, Sparkles, Calendar, Play, Plus, BookOpen, Video } from 'lucide-react';
+import { 
+  X, Send, Lock, CheckCircle2, Clock, MessageSquare, Sparkles, 
+  Calendar, Play, Plus, BookOpen, Video, Mic, MicOff, Image, FileText, Paperclip, Volume2 
+} from 'lucide-react';
 import { api } from '../services/api';
+import { 
+  joinChatRoom, 
+  leaveChatRoom, 
+  sendChatMessage, 
+  sendTypingStatus, 
+  onReceiveMessage, 
+  onUserTyping 
+} from '../services/socket.js';
 
 export default function ChatModal({ 
   application, 
@@ -13,9 +24,21 @@ export default function ChatModal({
   const [status, setStatus] = useState(application?.status || 'PENDING');
   const [inputText, setInputText] = useState('');
   const [sending, setSending] = useState(false);
+  const [typingUser, setTypingUser] = useState(null);
   const [showSessionModal, setShowSessionModal] = useState(false);
   const [activeTab, setActiveTab] = useState('MESSAGES'); // 'MESSAGES' or 'SESSIONS'
   const messagesEndRef = useRef(null);
+
+  // Voice Note Recording & Attachment Menu state
+  const [isRecordingVoice, setIsRecordingVoice] = useState(false);
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
+  const [showAttachmentMenu, setShowAttachmentMenu] = useState(false);
+  const recordingIntervalRef = useRef(null);
+
+  // Hidden File Inputs
+  const imageInputRef = useRef(null);
+  const videoInputRef = useRef(null);
+  const docInputRef = useRef(null);
 
   // Session form state
   const [sessionTitle, setSessionTitle] = useState('');
@@ -37,12 +60,37 @@ export default function ChatModal({
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, typingUser]);
 
   useEffect(() => {
     if (application?.id) {
       fetchMessages();
+      joinChatRoom(application.id);
+
+      onReceiveMessage((newMsg) => {
+        if (newMsg) {
+          setMessages(prev => {
+            const exists = prev.some(m => m.id === newMsg.id || (m.text === newMsg.text && m.sender === newMsg.sender));
+            if (exists) {
+              return prev.map(m => (m.text === newMsg.text && m.sender === newMsg.sender) ? newMsg : m);
+            }
+            return [...prev, newMsg];
+          });
+        }
+      });
+
+      onUserTyping(({ sender, isTyping }) => {
+        if (sender !== currentUserName) {
+          setTypingUser(isTyping ? sender : null);
+        }
+      });
     }
+
+    return () => {
+      if (application?.id) {
+        leaveChatRoom(application.id);
+      }
+    };
   }, [application?.id]);
 
   const fetchMessages = async () => {
@@ -64,6 +112,14 @@ export default function ChatModal({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const handleInputChange = (e) => {
+    const val = e.target.value;
+    setInputText(val);
+    if (application?.id && status === 'ACCEPTED') {
+      sendTypingStatus(application.id, currentUserName, val.length > 0);
+    }
+  };
+
   const handleSend = async (e) => {
     e.preventDefault();
     if (!inputText.trim() || sending) return;
@@ -76,6 +132,7 @@ export default function ChatModal({
     const textToSend = inputText.trim();
     setInputText('');
     setSending(true);
+    sendTypingStatus(application.id, currentUserName, false);
 
     const tempMsg = {
       id: `temp-${Date.now()}`,
@@ -93,13 +150,101 @@ export default function ChatModal({
         senderRole: tempMsg.senderRole,
         text: textToSend
       });
+      const finalMsg = res.chatMessage || tempMsg;
       if (res.chatMessage) {
         setMessages(prev => prev.map(m => m.id === tempMsg.id ? res.chatMessage : m));
       }
+      // Broadcast over Socket.io
+      sendChatMessage(application.id, finalMsg);
     } catch (err) {
       console.error('Failed to send message:', err);
     } finally {
       setSending(false);
+    }
+  };
+
+  // Voice Note Handlers
+  const startVoiceRecording = () => {
+    if (status !== 'ACCEPTED') {
+      alert('Chat is locked until the Guru approves this request.');
+      return;
+    }
+    setIsRecordingVoice(true);
+    setRecordingSeconds(0);
+    recordingIntervalRef.current = setInterval(() => {
+      setRecordingSeconds(prev => prev + 1);
+    }, 1000);
+  };
+
+  const stopAndSendVoiceRecording = async () => {
+    if (!isRecordingVoice) return;
+    clearInterval(recordingIntervalRef.current);
+    const durationSec = recordingSeconds > 0 ? recordingSeconds : 6;
+    setIsRecordingVoice(false);
+    setRecordingSeconds(0);
+
+    const voiceText = `🎙️ Voice Note (${durationSec}s)`;
+    const attachment = {
+      type: 'voice',
+      duration: `${durationSec}s`,
+      url: '/audio/sample_voice_note.mp3'
+    };
+
+    await sendMediaOrVoiceMessage(voiceText, attachment);
+  };
+
+  // File Attachment Handlers
+  const handleFileChange = async (e, mediaType) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setShowAttachmentMenu(false);
+
+    const objectUrl = URL.createObjectURL(file);
+    const attachment = {
+      type: mediaType,
+      fileName: file.name,
+      url: objectUrl,
+      size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`
+    };
+
+    let labelText = `Shared ${mediaType}: ${file.name}`;
+    if (mediaType === 'image') labelText = `📷 Shared Image: ${file.name}`;
+    if (mediaType === 'video') labelText = `🎥 Shared Video: ${file.name}`;
+    if (mediaType === 'document') labelText = `📄 Shared Document: ${file.name}`;
+
+    await sendMediaOrVoiceMessage(labelText, attachment);
+  };
+
+  const sendMediaOrVoiceMessage = async (textToSend, attachment = null) => {
+    if (status !== 'ACCEPTED' || sending) return;
+
+    sendTypingStatus(application.id, currentUserName, false);
+
+    const tempMsg = {
+      id: `temp-${Date.now()}`,
+      sender: currentUserName,
+      senderRole: isLearner ? 'LEARNER' : 'PRACTITIONER',
+      text: textToSend,
+      attachment,
+      timestamp: new Date().toISOString()
+    };
+
+    setMessages(prev => [...prev, tempMsg]);
+
+    try {
+      const res = await api.sendMessage(application.id, {
+        sender: tempMsg.sender,
+        senderRole: tempMsg.senderRole,
+        text: textToSend,
+        attachment
+      });
+      const finalMsg = res.chatMessage || tempMsg;
+      if (res.chatMessage) {
+        setMessages(prev => prev.map(m => m.id === tempMsg.id ? res.chatMessage : m));
+      }
+      sendChatMessage(application.id, finalMsg);
+    } catch (err) {
+      console.error('Failed to send attachment message:', err);
     }
   };
 
@@ -287,13 +432,58 @@ export default function ChatModal({
                       </div>
 
                       <div
-                        className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-xs shadow-2xs leading-relaxed ${
+                        className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-xs shadow-2xs leading-relaxed space-y-2 ${
                           isMine
                             ? 'bg-[#133e31] text-white rounded-br-none'
                             : 'bg-white text-stone-800 border border-stone-200 rounded-bl-none'
                         }`}
                       >
-                        {msg.text}
+                        <div>{msg.text}</div>
+
+                        {/* Render Attached Image */}
+                        {msg.attachment && msg.attachment.type === 'image' && (
+                          <div className="mt-1.5 rounded-xl overflow-hidden border border-stone-200/40 shadow-xs max-w-xs bg-stone-900/10">
+                            <img src={msg.attachment.url} alt="Shared image" className="w-full h-40 object-cover rounded-lg" />
+                            <div className="p-1.5 text-[10px] font-bold truncate opacity-90">
+                              📷 {msg.attachment.fileName}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Render Attached Video */}
+                        {msg.attachment && msg.attachment.type === 'video' && (
+                          <div className="mt-1.5 rounded-xl overflow-hidden border border-stone-200/40 shadow-xs max-w-xs bg-stone-900 text-white p-2 space-y-1">
+                            <div className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-300">
+                              <Video className="w-4 h-4 text-emerald-400" />
+                              <span>Shared Video Recording</span>
+                            </div>
+                            <video controls src={msg.attachment.url} className="w-full h-32 rounded-lg object-cover bg-black" />
+                            <div className="text-[10px] opacity-80 truncate">{msg.attachment.fileName}</div>
+                          </div>
+                        )}
+
+                        {/* Render Attached Document */}
+                        {msg.attachment && msg.attachment.type === 'document' && (
+                          <div className={`mt-1.5 p-2 rounded-xl border flex items-center gap-2 text-xs font-semibold ${
+                            isMine ? 'bg-emerald-900/40 border-emerald-600/50 text-white' : 'bg-stone-50 border-stone-200 text-stone-900'
+                          }`}>
+                            <FileText className="w-4 h-4 text-amber-400 shrink-0" />
+                            <div className="truncate text-[11px]">
+                              <span className="font-bold block truncate">{msg.attachment.fileName}</span>
+                              <span className="text-[9px] opacity-75">{msg.attachment.size || 'PDF Document'}</span>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Render Voice Note */}
+                        {msg.attachment && msg.attachment.type === 'voice' && (
+                          <div className={`mt-1.5 p-2 rounded-xl border flex items-center gap-2 text-xs font-semibold ${
+                            isMine ? 'bg-emerald-900/50 border-emerald-600/50 text-white' : 'bg-emerald-50 border-emerald-200 text-emerald-950'
+                          }`}>
+                            <Volume2 className="w-4 h-4 text-amber-300 shrink-0 animate-pulse" />
+                            <span className="text-[11px] font-bold">Voice Note ({msg.attachment.duration || '0:12s'})</span>
+                          </div>
+                        )}
                       </div>
 
                       <span className="text-[9px] text-stone-400 mt-1 px-1">
@@ -303,23 +493,110 @@ export default function ChatModal({
                   );
                 })
               )}
+              {typingUser && (
+                <div className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-700 bg-emerald-50/80 px-3 py-1.5 rounded-lg border border-emerald-200/60 animate-pulse">
+                  <Sparkles className="w-3 h-3 text-emerald-600 animate-spin" />
+                  <span>{typingUser} is typing...</span>
+                </div>
+              )}
               <div ref={messagesEndRef} />
             </div>
 
+            {/* Hidden File Inputs */}
+            <input type="file" ref={imageInputRef} accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, 'image')} />
+            <input type="file" ref={videoInputRef} accept="video/*" className="hidden" onChange={(e) => handleFileChange(e, 'video')} />
+            <input type="file" ref={docInputRef} accept=".pdf,.doc,.docx,.txt" className="hidden" onChange={(e) => handleFileChange(e, 'document')} />
+
+            {/* Voice Recording Active Bar */}
+            {isRecordingVoice && (
+              <div className="px-4 py-2 bg-red-50 border-t border-red-200 flex items-center justify-between text-xs text-red-700 font-bold shrink-0 animate-pulse">
+                <div className="flex items-center gap-2">
+                  <Mic className="w-4 h-4 text-red-600 animate-spin" />
+                  <span>Recording Voice Message ({recordingSeconds}s)...</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={stopAndSendVoiceRecording}
+                  className="px-3 py-1 rounded-lg bg-red-600 text-white text-[11px] font-bold shadow-2xs hover:bg-red-700 cursor-pointer"
+                >
+                  Stop & Send Voice Note
+                </button>
+              </div>
+            )}
+
+            {/* Attachment Menu Popup */}
+            {showAttachmentMenu && (
+              <div className="absolute bottom-16 left-4 z-40 bg-white rounded-2xl shadow-xl border border-stone-200 p-2 space-y-1 w-52 animate-in fade-in zoom-in-95">
+                <div className="px-2.5 py-1 text-[10px] font-bold text-stone-400 uppercase tracking-wider">
+                  Share Media & Files
+                </div>
+                <button
+                  type="button"
+                  onClick={() => imageInputRef.current?.click()}
+                  className="w-full px-3 py-2 rounded-xl hover:bg-stone-100 flex items-center gap-2 text-xs font-bold text-stone-800 transition cursor-pointer"
+                >
+                  <Image className="w-4 h-4 text-emerald-600" />
+                  <span>Share Image</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => videoInputRef.current?.click()}
+                  className="w-full px-3 py-2 rounded-xl hover:bg-stone-100 flex items-center gap-2 text-xs font-bold text-stone-800 transition cursor-pointer"
+                >
+                  <Video className="w-4 h-4 text-purple-600" />
+                  <span>Share Video</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => docInputRef.current?.click()}
+                  className="w-full px-3 py-2 rounded-xl hover:bg-stone-100 flex items-center gap-2 text-xs font-bold text-stone-800 transition cursor-pointer"
+                >
+                  <FileText className="w-4 h-4 text-blue-600" />
+                  <span>Share Document</span>
+                </button>
+              </div>
+            )}
+
             {/* Message Input Form Footer */}
-            <form onSubmit={handleSend} className="p-3 bg-white border-t border-stone-200 flex items-center gap-2 shrink-0">
+            <form onSubmit={handleSend} className="p-3 bg-white border-t border-stone-200 flex items-center gap-2 shrink-0 relative">
+              {/* + Attachment Button */}
+              <button
+                type="button"
+                disabled={status !== 'ACCEPTED'}
+                onClick={() => setShowAttachmentMenu(prev => !prev)}
+                className="p-2.5 rounded-xl border border-stone-200 bg-stone-50 hover:bg-stone-100 text-stone-700 disabled:opacity-50 transition cursor-pointer shrink-0 shadow-2xs"
+                title="Share Image, Video, or Document (+)"
+              >
+                <Plus className="w-4 h-4 text-stone-700" />
+              </button>
+
               <input
                 type="text"
                 value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
+                onChange={handleInputChange}
                 disabled={status !== 'ACCEPTED'}
                 placeholder={
                   status === 'ACCEPTED'
                     ? `Type message to ${otherPartyName}...`
                     : "Chat disabled until request is approved..."
                 }
-                className="flex-1 text-xs px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-stone-900 focus:outline-hidden focus:ring-2 focus:ring-emerald-600/30 focus:border-emerald-600 disabled:opacity-60 disabled:cursor-not-allowed transition"
+                className="flex-1 text-xs px-3.5 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-stone-900 focus:outline-hidden focus:ring-2 focus:ring-emerald-600/30 focus:border-emerald-600 disabled:opacity-60 disabled:cursor-not-allowed transition"
               />
+
+              {/* Mic Voice Button */}
+              <button
+                type="button"
+                disabled={status !== 'ACCEPTED'}
+                onClick={isRecordingVoice ? stopAndSendVoiceRecording : startVoiceRecording}
+                className={`p-2.5 rounded-xl border transition cursor-pointer shrink-0 shadow-2xs ${
+                  isRecordingVoice
+                    ? 'bg-red-600 text-white border-red-600 animate-bounce'
+                    : 'bg-amber-50 hover:bg-amber-100 border-amber-200 text-amber-900'
+                }`}
+                title={isRecordingVoice ? "Stop & Send Voice Note" : "Send Voice Message"}
+              >
+                <Mic className="w-4 h-4" />
+              </button>
 
               <button
                 type="submit"

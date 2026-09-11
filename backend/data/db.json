@@ -330,7 +330,7 @@
       "state": "Maharashtra",
       "community": "Maharashtra Community & Dhol Tasha Pathaks",
       "language": "Marathi",
-      "score": 88,
+      "score": 90,
       "status": "STRONG",
       "statusLabel": "Strong",
       "statusDetail": "Vibrant Community Celebration",
@@ -3451,6 +3451,63 @@
   ],
   "knowledgeVault": [
     {
+      "id": "kn-1788938151834",
+      "title": "Rongali Bihu Festival (ৰঙালী বিহু) (Assam)",
+      "tradition": "Rongali Bihu Festival (ৰঙালী বিহু)",
+      "practitioner": "Shahir Tukaram Jagtap",
+      "type": "Voice AI Query & Knowledge Retrieval",
+      "language": "EN",
+      "date": "2026-09-09",
+      "tags": [
+        "Assam",
+        "AI Retrieved",
+        "Voice Archive",
+        "Oral Heritage"
+      ],
+      "consent": "Verified Community Heritage Access",
+      "transcriptExcerpt": "What is Rongali Bihu of Assam?",
+      "englishTranslation": "Rongali Bihu is Assam's spring New Year festival celebrating agricultural fertility with Muga silk Mekhela Chadors, Pepa buffalo-horn trumpets, and Bihu Dhol drums.",
+      "createdAt": "2026-09-09T07:15:51.834Z"
+    },
+    {
+      "id": "kn-1788938145624",
+      "title": "Shahiri Powada (शाहीरी पोवाडा) (Maharashtra)",
+      "tradition": "Shahiri Powada (शाहीरी पोवाडा)",
+      "practitioner": "Shahir Tukaram Jagtap",
+      "type": "Voice AI Query & Knowledge Retrieval",
+      "language": "EN",
+      "date": "2026-09-09",
+      "tags": [
+        "Maharashtra",
+        "AI Retrieved",
+        "Voice Archive",
+        "Oral Heritage"
+      ],
+      "consent": "Verified Community Heritage Access",
+      "transcriptExcerpt": "Powada Shahiri Tukaram",
+      "englishTranslation": "Shahiri Powada is a 17th-century Marathi heroic oral ballad tradition created during Chhatrapati Shivaji Maharaj's Maratha Empire. Performed with Daf drum and Tuntuna string by Shahirs like Shahir Tukaram Jagtap. Current threat status: Critical.",
+      "createdAt": "2026-09-09T07:15:45.624Z"
+    },
+    {
+      "id": "kn-1788772058605",
+      "title": "Warli Art & Tarpa Ritual (वारली चित्रकला) (Maharashtra)",
+      "tradition": "Warli Art & Tarpa Ritual (वारली चित्रकला)",
+      "practitioner": "Shahir Tukaram Jagtap",
+      "type": "Voice AI Query & Knowledge Retrieval",
+      "language": "EN",
+      "date": "2026-09-07",
+      "tags": [
+        "Maharashtra",
+        "AI Retrieved",
+        "Voice Archive",
+        "Oral Heritage"
+      ],
+      "consent": "Verified Community Heritage Access",
+      "transcriptExcerpt": "What is Warli Art & Tarpa ritual?",
+      "englishTranslation": "Warli Art is an ancient indigenous tribal painting and ritual dance from Palghar, Maharashtra. Master artisan Sushma Vangad uses geometric shapes painted with rice paste to celebrate Mother Earth and the Tarpa horn instrument.",
+      "createdAt": "2026-09-07T09:07:38.605Z"
+    },
+    {
       "id": "kn-401",
       "title": "Shivaji Maharaj Afzal Khan Vadh Ballad (Historical Shahiri Recitation)",
       "tradition": "Shahiri Powada",
@@ -3496,16 +3553,19 @@
       "password": "password123",
       "name": "Aniket Deshmukh",
       "role": "LEARNER",
-      "dob": "2002-05-13T18:30:00.000Z",
+      "dob": "2002-05-12T18:30:00.000Z",
       "hobbies": "Shahiri Powada recitation, Daf percussion, Historical Maratha Ballads",
       "state": "Maharashtra",
+      "idType": "Aadhaar Card",
+      "idNumber": "8823-4412-9901",
+      "idProofFileName": "aadhaar_aniket_deshmukh.pdf",
       "profileCompleted": true,
       "createdAt": "2026-09-07T06:18:45.959Z",
       "experience": null,
       "expert_tradition": null,
       "profile_completed": true,
       "created_at": "2026-09-05T16:40:29.153Z",
-      "updated_at": "2026-09-07T06:19:54.506Z"
+      "updated_at": "2026-09-10T05:57:26.571Z"
     },
     {
       "id": "user-shishya-1",
@@ -3624,6 +3684,9 @@
       "state": "Gujarat",
       "experience": "25 Years of Bhavai Folk Theatre & Garba compositions",
       "expertTradition": "Bhavai Folk Theatre",
+      "idType": "Aadhaar Card",
+      "idNumber": "5566-7788-9900",
+      "idProofFileName": "aadhaar_raghunath_joshi.pdf",
       "profileCompleted": true,
       "createdAt": "2026-09-07T06:13:57.804Z",
       "hobbies": null,
@@ -3672,6 +3735,9 @@
       "state": "Maharashtra",
       "experience": "28 Years of continuous Shahiri Akhada & Daf oral tradition",
       "expertTradition": "Shahiri Powada (Oral Ballads)",
+      "idType": "Aadhaar Card",
+      "idNumber": "7723-1188-4490",
+      "idProofFileName": "aadhaar_shahir_tukaram.pdf",
       "profileCompleted": true,
       "createdAt": "2026-09-07T06:13:57.804Z",
       "hobbies": null,
@@ -3871,6 +3937,9 @@
       "dob": "2003-11-20",
       "hobbies": "Phulkari folk embroidery, Giddha folk dance, Punjabi folk music",
       "state": "Punjab",
+      "idType": "Voter ID",
+      "idNumber": "PB99882231",
+      "idProofFileName": "voter_id_simran_kaur.pdf",
       "profileCompleted": true,
       "createdAt": "2026-09-05T14:44:07.549Z"
     },
@@ -3897,11 +3966,14 @@
       "state": "Punjab",
       "experience": "32 Years of traditional Gatka Shastar Vidiya & folk rhythms",
       "expertTradition": "Baisakhi & Gatka Martial Art",
+      "idType": "PAN Card",
+      "idNumber": "HARIS7788K",
+      "idProofFileName": "pan_harinder_singh.pdf",
       "profileCompleted": true,
       "createdAt": "2026-09-05T14:44:07.549Z"
     },
     {
-      "id": "user-admin-01",
+      "id": "user-admin-1",
       "email": "admin@sanskriti.gov.in",
       "password": "adminpassword123",
       "name": "Dr. Rajesh Sharma",
@@ -3910,7 +3982,14 @@
       "designation": "Director of Living Heritage, Ministry of Culture",
       "clearance": "National Level-4 Cultural Administrator",
       "profileCompleted": true,
-      "createdAt": "2026-09-05T14:44:07.549Z"
+      "createdAt": "2026-09-05T14:44:07.549Z",
+      "dob": null,
+      "hobbies": null,
+      "experience": null,
+      "expert_tradition": null,
+      "profile_completed": true,
+      "created_at": "2026-09-05T16:40:29.161Z",
+      "updated_at": "2026-09-10T05:29:14.863Z"
     },
     {
       "id": "user-shishya-03",
@@ -3921,6 +4000,9 @@
       "dob": "2001-09-10",
       "hobbies": "Bhavai vesha acting, Garba drumming, Kutchi embroidery",
       "state": "Gujarat",
+      "idType": "PAN Card",
+      "idNumber": "ABCDE5678G",
+      "idProofFileName": "pan_aarav_patel.pdf",
       "profileCompleted": true,
       "createdAt": "2026-09-07T05:34:11.674Z"
     },
@@ -3933,6 +4015,9 @@
       "dob": "2004-03-08",
       "hobbies": "Koodiyattam facial expressions, Mizhavu drumming, Mohiniyattam",
       "state": "Kerala",
+      "idType": "Aadhaar Card",
+      "idNumber": "9912-3344-5566",
+      "idProofFileName": "aadhaar_meera_menon.pdf",
       "profileCompleted": true,
       "createdAt": "2026-09-07T05:34:11.674Z"
     },
@@ -3945,6 +4030,9 @@
       "dob": "2002-12-14",
       "hobbies": "Bihu Dhol playing, Pepa flute, Assamese oral legends",
       "state": "Assam",
+      "idType": "Voter ID",
+      "idNumber": "AS44556677",
+      "idProofFileName": "voter_id_bishal_saikia.pdf",
       "profileCompleted": true,
       "createdAt": "2026-09-07T05:34:11.674Z"
     },
@@ -3971,6 +4059,9 @@
       "state": "Kerala",
       "experience": "30 Years of Koodiyattam Sanskrit Theatre & Mudras",
       "expertTradition": "Koodiyattam Sanskrit Theatre",
+      "idType": "Voter ID",
+      "idNumber": "KL88776655",
+      "idProofFileName": "voter_id_manikandan_nair.pdf",
       "profileCompleted": true,
       "createdAt": "2026-09-07T05:34:11.674Z"
     },
@@ -3984,11 +4075,35 @@
       "state": "Assam",
       "experience": "22 Years of Bihu Folk Dance & Muga Silk Weaving",
       "expertTradition": "Rongali Bihu & Folk Instruments",
+      "idType": "Aadhaar Card",
+      "idNumber": "3344-5566-7788",
+      "idProofFileName": "aadhaar_hemlata_gogoi.pdf",
       "profileCompleted": true,
       "createdAt": "2026-09-07T05:34:11.674Z"
     }
   ],
   "applications": [
+    {
+      "learnerId": "user-shishya-01",
+      "learnerName": "Aniket Deshmukh",
+      "practitionerId": "mp-1",
+      "practitionerName": "Shahir Tukaram Jagtap",
+      "tradition": "Shahiri Powada",
+      "note": "Respected Shahir Tukaram Jagtap ji, I am eager to learn Shahiri Powada under your guidance.",
+      "status": "ACCEPTED",
+      "messages": [
+        {
+          "id": "msg-1788771832980",
+          "sender": "Aniket Deshmukh",
+          "senderRole": "LEARNER",
+          "text": "Respected Shahir Tukaram Jagtap ji, I am eager to learn Shahiri Powada under your guidance.",
+          "timestamp": "2026-09-07T09:03:52.980Z"
+        }
+      ],
+      "submittedAt": "2026-09-07T09:03:52.980Z",
+      "id": "app-1788771832980",
+      "respondedAt": "2026-09-07T09:04:13.517Z"
+    },
     {
       "learnerId": "user-shishya-01",
       "learnerName": "Aniket Deshmukh",
@@ -4018,81 +4133,40 @@
           "senderRole": "LEARNER",
           "text": "hello",
           "timestamp": "2026-09-07T06:05:26.010Z"
+        },
+        {
+          "id": "msg-1788766568787",
+          "sender": "Shahir Tukaram Jagtap",
+          "senderRole": "PRACTITIONER",
+          "text": "hii",
+          "timestamp": "2026-09-07T07:36:08.787Z"
+        },
+        {
+          "id": "msg-sys-1788766601263",
+          "sender": "Sanskriti System",
+          "senderRole": "SYSTEM",
+          "text": "📅 New Gurukul Learning Session Scheduled: \"introduction\" on 2026-09-07 at 1:15 AM (Gurukul Offline Residency).",
+          "timestamp": "2026-09-07T07:36:41.263Z"
         }
       ],
       "submittedAt": "2026-09-07T06:01:45.164Z",
       "id": "app-1788760905164",
       "respondedAt": "2026-09-07T06:04:21.494Z",
-      "lastMessageAt": "2026-09-07T06:05:26.010Z"
-    },
-    {
-      "learnerId": "user-shishya-01",
-      "learnerName": "Aniket Deshmukh",
-      "practitionerId": "mp-2",
-      "practitionerName": "Sushma Vangad",
-      "tradition": "Warli Art",
-      "note": "Respected Sushma Vangad ji, I am eager to learn Warli Art under your guidance.",
-      "status": "PENDING",
-      "messages": [
+      "lastMessageAt": "2026-09-07T07:36:08.787Z",
+      "sessions": [
         {
-          "id": "msg-1788758583465",
-          "sender": "Aniket Deshmukh",
-          "senderRole": "LEARNER",
-          "text": "Respected Sushma Vangad ji, I am eager to learn Warli Art under your guidance.",
-          "timestamp": "2026-09-07T05:23:03.465Z"
+          "id": "ses-1788766601263",
+          "title": "introduction",
+          "date": "2026-09-07",
+          "time": "1:15 AM",
+          "mode": "Gurukul Offline Residency",
+          "notes": "",
+          "status": "COMPLETED",
+          "createdAt": "2026-09-07T07:36:41.263Z",
+          "updatedAt": "2026-09-07T07:36:47.094Z"
         }
       ],
-      "submittedAt": "2026-09-07T05:23:03.465Z",
-      "id": "app-1788758583465"
-    },
-    {
-      "learnerId": "user-shishya-01",
-      "learnerName": "Aniket Deshmukh",
-      "practitionerId": "mp-1",
-      "practitionerName": "Shahir Tukaram Jagtap",
-      "tradition": "Powada",
-      "note": "Respected Shahir Tukaram Jagtap ji, I am eager to learn Powada under your guidance.",
-      "status": "ACCEPTED",
-      "messages": [
-        {
-          "id": "msg-1788758397253",
-          "sender": "Aniket Deshmukh",
-          "senderRole": "LEARNER",
-          "text": "Respected Shahir Tukaram Jagtap ji, I am eager to learn Powada under your guidance.",
-          "timestamp": "2026-09-07T05:19:57.253Z"
-        },
-        {
-          "id": "msg-1788758806501",
-          "sender": "Shahir Tukaram Jagtap",
-          "senderRole": "PRACTITIONER",
-          "text": "hello",
-          "timestamp": "2026-09-07T05:26:46.501Z"
-        }
-      ],
-      "submittedAt": "2026-09-07T05:19:57.253Z",
-      "id": "app-1788758397253",
-      "respondedAt": "2026-09-07T05:26:38.412Z",
-      "lastMessageAt": "2026-09-07T05:26:46.501Z"
-    },
-    {
-      "id": "app-01",
-      "learnerId": "user-learner-01",
-      "learnerName": "Aniket Deshmukh",
-      "practitionerId": "mp-1",
-      "practitionerName": "Shahir Tukaram Jagtap",
-      "tradition": "Shahiri Powada",
-      "status": "ACCEPTED",
-      "submittedAt": "2026-08-10T10:00:00Z",
-      "messages": [
-        {
-          "id": "msg-1788758286912",
-          "sender": "Guru",
-          "senderRole": "PRACTITIONER",
-          "text": "radhe radhe guruji",
-          "timestamp": "2026-09-07T05:18:06.912Z"
-        }
-      ],
-      "lastMessageAt": "2026-09-07T05:18:06.912Z"
+      "lastSessionAt": "2026-09-07T07:36:41.263Z"
     }
   ]
 }

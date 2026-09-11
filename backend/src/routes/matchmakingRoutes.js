@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { db } from '../services/db.js';
+import { verifyToken, optionalToken } from '../middleware/authMiddleware.js';
 
 const router = Router();
 
@@ -16,7 +17,7 @@ router.get('/learners', (req, res) => {
 });
 
 // GET /api/match/applications - List active applications with optional filters
-router.get('/applications', (req, res) => {
+router.get('/applications', optionalToken, (req, res) => {
   const { learnerId, practitionerId, status } = req.query;
   let applications = db.getCollection('applications');
 
@@ -33,8 +34,8 @@ router.get('/applications', (req, res) => {
   return res.json({ success: true, count: applications.length, applications });
 });
 
-// POST /api/match/apply - Shishya chooses Guru and sends request + initial message
-router.post('/apply', (req, res) => {
+// POST /api/match/apply - Shishya chooses Guru and sends request + initial message (Requires JWT Auth)
+router.post('/apply', verifyToken, (req, res) => {
   try {
     const { 
       learnerId, 
@@ -80,10 +81,8 @@ router.post('/apply', (req, res) => {
   }
 });
 
-import { requireRole } from '../middleware/rbac.js';
-
-// PUT /api/match/requests/:id/respond - Guru accepts/rejects Shishya
-router.put('/requests/:id/respond', (req, res) => {
+// PUT /api/match/requests/:id/respond - Guru accepts/rejects Shishya (Requires JWT Auth)
+router.put('/requests/:id/respond', verifyToken, (req, res) => {
   try {
     const { status } = req.body; // 'ACCEPTED' | 'REJECTED'
     if (!status || !['ACCEPTED', 'REJECTED', 'PENDING'].includes(status)) {
@@ -115,7 +114,7 @@ router.put('/requests/:id/respond', (req, res) => {
 });
 
 // GET /api/match/applications/:id/messages - Get chat messages for an application
-router.get('/applications/:id/messages', (req, res) => {
+router.get('/applications/:id/messages', optionalToken, (req, res) => {
   const app = db.getById('applications', req.params.id);
   if (!app) {
     return res.status(404).json({ error: 'Application not found' });
@@ -127,8 +126,8 @@ router.get('/applications/:id/messages', (req, res) => {
   });
 });
 
-// POST /api/match/applications/:id/messages - Send a chat message (Only allowed if ACCEPTED)
-router.post('/applications/:id/messages', (req, res) => {
+// POST /api/match/applications/:id/messages - Send a chat message (Requires JWT Auth)
+router.post('/applications/:id/messages', verifyToken, (req, res) => {
   try {
     const app = db.getById('applications', req.params.id);
     if (!app) {
@@ -148,8 +147,8 @@ router.post('/applications/:id/messages', (req, res) => {
 
     const newMsg = {
       id: `msg-${Date.now()}`,
-      sender: sender || 'User',
-      senderRole: senderRole || 'LEARNER',
+      sender: sender || req.user?.name || 'User',
+      senderRole: senderRole || req.user?.role || 'LEARNER',
       text: text.trim(),
       timestamp: new Date().toISOString()
     };
@@ -174,8 +173,8 @@ router.post('/applications/:id/messages', (req, res) => {
   }
 });
 
-// POST /api/match/applications/:id/sessions - Schedule/Start a new learning session
-router.post('/applications/:id/sessions', (req, res) => {
+// POST /api/match/applications/:id/sessions - Schedule/Start a new learning session (Requires JWT Auth)
+router.post('/applications/:id/sessions', verifyToken, (req, res) => {
   try {
     const app = db.getById('applications', req.params.id);
     if (!app) {

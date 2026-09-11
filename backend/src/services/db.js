@@ -43,6 +43,10 @@ class JSONDatabase {
               dob: '2002-05-15',
               hobbies: 'Shahiri Powada recitation, Daf percussion, Historical Maratha Ballads',
               state: 'Maharashtra',
+              idType: 'Aadhaar Card',
+              idNumber: '4829-1029-3847',
+              idProofFileName: 'aniket_aadhaar_card.pdf',
+              idVerified: true,
               profileCompleted: true,
               createdAt: new Date().toISOString()
             },
@@ -56,6 +60,10 @@ class JSONDatabase {
               dob: '2003-11-20',
               hobbies: 'Phulkari folk embroidery, Giddha folk dance, Punjabi folk music',
               state: 'Punjab',
+              idType: 'Voter ID',
+              idNumber: 'PBV9823412',
+              idProofFileName: 'simran_voter_id.pdf',
+              idVerified: true,
               profileCompleted: true,
               createdAt: new Date().toISOString()
             },
@@ -69,6 +77,10 @@ class JSONDatabase {
               dob: '2001-09-10',
               hobbies: 'Bhavai vesha acting, Garba drumming, Kutchi embroidery',
               state: 'Gujarat',
+              idType: 'PAN Card',
+              idNumber: 'APATE7890K',
+              idProofFileName: 'aarav_pan_card.jpg',
+              idVerified: true,
               profileCompleted: true,
               createdAt: new Date().toISOString()
             },
@@ -82,6 +94,10 @@ class JSONDatabase {
               dob: '2004-03-08',
               hobbies: 'Koodiyattam facial expressions, Mizhavu drumming, Mohiniyattam',
               state: 'Kerala',
+              idType: 'Aadhaar Card',
+              idNumber: '9012-3456-7890',
+              idProofFileName: 'meera_aadhaar.pdf',
+              idVerified: true,
               profileCompleted: true,
               createdAt: new Date().toISOString()
             },
@@ -95,6 +111,10 @@ class JSONDatabase {
               dob: '2002-12-14',
               hobbies: 'Bihu Dhol playing, Pepa flute, Assamese oral legends',
               state: 'Assam',
+              idType: 'Aadhaar Card',
+              idNumber: '3456-7890-1234',
+              idProofFileName: 'bishal_aadhaar.pdf',
+              idVerified: true,
               profileCompleted: true,
               createdAt: new Date().toISOString()
             },
@@ -109,6 +129,10 @@ class JSONDatabase {
               state: 'Maharashtra',
               experience: '28 Years of continuous Shahiri Akhada & Daf oral tradition',
               expertTradition: 'Shahiri Powada (Oral Ballads)',
+              idType: 'Aadhaar Card',
+              idNumber: '8910-2345-6789',
+              idProofFileName: 'shahir_jagtap_aadhaar.pdf',
+              idVerified: true,
               profileCompleted: true,
               createdAt: new Date().toISOString()
             },
@@ -123,6 +147,10 @@ class JSONDatabase {
               state: 'Punjab',
               experience: '32 Years of traditional Gatka Shastar Vidiya & folk rhythms',
               expertTradition: 'Baisakhi & Gatka Martial Art',
+              idType: 'Voter ID',
+              idNumber: 'PBV4567890',
+              idProofFileName: 'ustad_harinder_voterid.pdf',
+              idVerified: true,
               profileCompleted: true,
               createdAt: new Date().toISOString()
             },
@@ -137,6 +165,10 @@ class JSONDatabase {
               state: 'Gujarat',
               experience: '25 Years of Bhavai Folk Theatre & Garba compositions',
               expertTradition: 'Bhavai Folk Theatre',
+              idType: 'PAN Card',
+              idNumber: 'PRJOS5678L',
+              idProofFileName: 'raghunath_pan_card.jpg',
+              idVerified: true,
               profileCompleted: true,
               createdAt: new Date().toISOString()
             },
@@ -151,6 +183,10 @@ class JSONDatabase {
               state: 'Kerala',
               experience: '30 Years of Koodiyattam Sanskrit Theatre & Mudras',
               expertTradition: 'Koodiyattam Sanskrit Theatre',
+              idType: 'Aadhaar Card',
+              idNumber: '6789-0123-4567',
+              idProofFileName: 'guru_nair_aadhaar.pdf',
+              idVerified: true,
               profileCompleted: true,
               createdAt: new Date().toISOString()
             },
@@ -165,6 +201,10 @@ class JSONDatabase {
               state: 'Assam',
               experience: '22 Years of Bihu Folk Dance & Muga Silk Weaving',
               expertTradition: 'Rongali Bihu & Folk Instruments',
+              idType: 'Aadhaar Card',
+              idNumber: '1234-5678-9012',
+              idProofFileName: 'hemlata_aadhaar.pdf',
+              idVerified: true,
               profileCompleted: true,
               createdAt: new Date().toISOString()
             },
@@ -178,20 +218,25 @@ class JSONDatabase {
               state: 'Delhi',
               designation: 'Director of Living Heritage, Ministry of Culture',
               clearance: 'National Level-4 Cultural Administrator',
+              idType: 'Government Admin ID',
+              idNumber: 'GOV-IND-2026-9812',
+              idProofFileName: 'admin_official_identity.pdf',
+              idVerified: true,
               profileCompleted: true,
               createdAt: new Date().toISOString()
             }
           ],
           applications: [
             {
-              id: 'app-01',
-              learnerId: 'user-learner-01',
+              id: 'app-1788760905164',
+              learnerId: 'user-shishya-01',
               learnerName: 'Aniket Deshmukh',
-              practitionerId: 'mp-1',
-              practitionerName: 'Shahir Tukaram Jagtap',
-              tradition: 'Shahiri Powada',
+              practitionerId: 'mp-3',
+              practitionerName: 'Pandit Raghunath Joshi',
+              tradition: 'Bhavai Folk Theatre',
+              note: 'Respected Pandit Raghunath Joshi ji, I am eager to learn Bhavai Folk Theatre under your guidance.',
               status: 'ACCEPTED',
-              submittedAt: '2026-08-10T10:00:00Z'
+              submittedAt: '2026-09-07T06:01:45.164Z'
             }
           ]
         };
@@ -225,6 +270,9 @@ class JSONDatabase {
         dob: '2002-05-15',
         hobbies: 'Shahiri Powada recitation, Daf percussion, Historical Maratha Ballads',
         state: 'Maharashtra',
+        idType: 'Aadhaar Card',
+        idNumber: '8823-4412-9901',
+        idProofFileName: 'aadhaar_aniket_deshmukh.pdf',
         profileCompleted: true,
         createdAt: new Date().toISOString()
       },
@@ -238,6 +286,9 @@ class JSONDatabase {
         dob: '2003-11-20',
         hobbies: 'Phulkari folk embroidery, Giddha folk dance, Punjabi folk music',
         state: 'Punjab',
+        idType: 'Voter ID',
+        idNumber: 'PB99882231',
+        idProofFileName: 'voter_id_simran_kaur.pdf',
         profileCompleted: true,
         createdAt: new Date().toISOString()
       },
@@ -251,6 +302,9 @@ class JSONDatabase {
         dob: '2001-09-10',
         hobbies: 'Bhavai vesha acting, Garba drumming, Kutchi embroidery',
         state: 'Gujarat',
+        idType: 'PAN Card',
+        idNumber: 'ABCDE5678G',
+        idProofFileName: 'pan_aarav_patel.pdf',
         profileCompleted: true,
         createdAt: new Date().toISOString()
       },
@@ -264,6 +318,9 @@ class JSONDatabase {
         dob: '2004-03-08',
         hobbies: 'Koodiyattam facial expressions, Mizhavu drumming, Mohiniyattam',
         state: 'Kerala',
+        idType: 'Aadhaar Card',
+        idNumber: '9912-3344-5566',
+        idProofFileName: 'aadhaar_meera_menon.pdf',
         profileCompleted: true,
         createdAt: new Date().toISOString()
       },
@@ -277,6 +334,9 @@ class JSONDatabase {
         dob: '2002-12-14',
         hobbies: 'Bihu Dhol playing, Pepa flute, Assamese oral legends',
         state: 'Assam',
+        idType: 'Voter ID',
+        idNumber: 'AS44556677',
+        idProofFileName: 'voter_id_bishal_saikia.pdf',
         profileCompleted: true,
         createdAt: new Date().toISOString()
       },
@@ -291,6 +351,9 @@ class JSONDatabase {
         state: 'Maharashtra',
         experience: '28 Years of continuous Shahiri Akhada & Daf oral tradition',
         expertTradition: 'Shahiri Powada (Oral Ballads)',
+        idType: 'Aadhaar Card',
+        idNumber: '7723-1188-4490',
+        idProofFileName: 'aadhaar_shahir_tukaram.pdf',
         profileCompleted: true,
         createdAt: new Date().toISOString()
       },
@@ -305,6 +368,9 @@ class JSONDatabase {
         state: 'Punjab',
         experience: '32 Years of traditional Gatka Shastar Vidiya & folk rhythms',
         expertTradition: 'Baisakhi & Gatka Martial Art',
+        idType: 'PAN Card',
+        idNumber: 'HARIS7788K',
+        idProofFileName: 'pan_harinder_singh.pdf',
         profileCompleted: true,
         createdAt: new Date().toISOString()
       },
@@ -319,6 +385,9 @@ class JSONDatabase {
         state: 'Gujarat',
         experience: '25 Years of Bhavai Folk Theatre & Garba compositions',
         expertTradition: 'Bhavai Folk Theatre',
+        idType: 'Aadhaar Card',
+        idNumber: '5566-7788-9900',
+        idProofFileName: 'aadhaar_raghunath_joshi.pdf',
         profileCompleted: true,
         createdAt: new Date().toISOString()
       },
@@ -333,6 +402,9 @@ class JSONDatabase {
         state: 'Kerala',
         experience: '30 Years of Koodiyattam Sanskrit Theatre & Mudras',
         expertTradition: 'Koodiyattam Sanskrit Theatre',
+        idType: 'Voter ID',
+        idNumber: 'KL88776655',
+        idProofFileName: 'voter_id_manikandan_nair.pdf',
         profileCompleted: true,
         createdAt: new Date().toISOString()
       },
@@ -347,6 +419,9 @@ class JSONDatabase {
         state: 'Assam',
         experience: '22 Years of Bihu Folk Dance & Muga Silk Weaving',
         expertTradition: 'Rongali Bihu & Folk Instruments',
+        idType: 'Aadhaar Card',
+        idNumber: '3344-5566-7788',
+        idProofFileName: 'aadhaar_hemlata_gogoi.pdf',
         profileCompleted: true,
         createdAt: new Date().toISOString()
       },

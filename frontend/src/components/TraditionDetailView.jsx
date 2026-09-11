@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import VoiceBot, { SUPPORTED_LANGUAGES } from './VoiceBot';
+import { translateText } from '../utils/translator';
 import { 
   ChevronLeft, 
   Activity, 
@@ -14,7 +16,9 @@ import {
   Music,
   Languages,
   BookOpen,
-  Wand2
+  Wand2,
+  Loader2,
+  Globe
 } from 'lucide-react';
 import { api } from '../services/api';
 import { getTraditionImage, getCategoryFallback } from '../utils/imageResolver';
@@ -53,40 +57,224 @@ export default function TraditionDetailView({
     ]
   };
 
-  const isCritical = currentTradition.score <= 40;
-  const isVulnerable = currentTradition.score > 40 && currentTradition.score < 70;
+  // Multilingual UI Translation & Voice Bot State
+  const [selectedLang, setSelectedLang] = useState(SUPPORTED_LANGUAGES[0]);
+  const [translatedDesc, setTranslatedDesc] = useState('');
+  const [translatedHistory, setTranslatedHistory] = useState('');
+  const [translatedReason, setTranslatedReason] = useState('');
+  const [translatedDetails, setTranslatedDetails] = useState('');
+  const [translatedFood, setTranslatedFood] = useState('');
+  const [translatedClothes, setTranslatedClothes] = useState('');
+  const [translatedFolk, setTranslatedFolk] = useState('');
+  const [translatedLangName, setTranslatedLangName] = useState('');
+  const [isTranslating, setIsTranslating] = useState(false);
 
-  // Derive attribute images or fetch from Gemini API
+  // Gemini AI 2026 Survival Vitality Engine
+  const [survivalData, setSurvivalData] = useState(null);
+  const [loadingSurvival, setLoadingSurvival] = useState(false);
+
+  const displayScore = survivalData?.survivalPercentage2026 ?? currentTradition.score ?? 35;
+  const displayStatusLabel = survivalData?.status || currentTradition.statusLabel || (displayScore < 50 ? 'Critical' : displayScore < 70 ? 'Vulnerable' : 'Strong');
+  const isCritical = displayScore < 50;
+  const isVulnerable = displayScore >= 50 && displayScore < 70;
+
+  useEffect(() => {
+    let isMounted = true;
+    if (currentTradition?.name) {
+      setLoadingSurvival(true);
+      api.predictTraditionSurvival({
+        traditionTitle: currentTradition.name,
+        state: currentTradition.state,
+        category: currentTradition.category,
+        activePractitioners: currentTradition.activePractitioners,
+        activeLearners: currentTradition.activeLearners,
+        score: currentTradition.score
+      }).then(res => {
+        if (isMounted && res) {
+          setSurvivalData(res);
+        }
+      }).catch(err => {
+        console.warn('Survival prediction error:', err);
+      }).finally(() => {
+        if (isMounted) setLoadingSurvival(false);
+      });
+    }
+    return () => { isMounted = false; };
+  }, [currentTradition?.name, currentTradition?.score]);
+
+  // Handle translation when selected language changes
+  useEffect(() => {
+    let isMounted = true;
+    if (selectedLang.code === 'en-IN') {
+      setTranslatedDesc('');
+      setTranslatedHistory('');
+      setTranslatedReason('');
+      setTranslatedDetails('');
+      setTranslatedFood('');
+      setTranslatedClothes('');
+      setTranslatedFolk('');
+      setTranslatedLangName('');
+      setIsTranslating(false);
+      return;
+    }
+
+    setIsTranslating(true);
+
+    const descToTrans = currentTradition.description || '';
+    const histToTrans = currentTradition.historyOrigin || `${currentTradition.name} originated as an integral living expression in ${currentTradition.state}, holding centuries of intergenerational wisdom passed down orally through master practitioners.`;
+    const reasonToTrans = currentTradition.reasonBehindIt || `Functions as a cohesive cultural pillar for local communities in ${currentTradition.state}, fostering ritual bonding, seasonal celebration, and identity preservation.`;
+    const detailsToTrans = currentTradition.fullDetails || `Practiced using traditional handloom weaving, specialized tools, indigenous dialects, and authentic regional garments of ${currentTradition.state}.`;
+    const foodToTrans = currentTradition.traditionalFood || `${currentTradition.state || 'Indian'} Traditional Culinary Feast`;
+    const clothesToTrans = currentTradition.traditionalClothes || `${currentTradition.state || 'Indian'} Traditional Heritage Attire`;
+    const folkToTrans = currentTradition.folkArts || `${currentTradition.name} Folk & Performing Art`;
+    const langToTrans = currentTradition.language || `${currentTradition.state || 'Regional'} Native Dialect`;
+
+    Promise.all([
+      translateText(descToTrans, selectedLang.code),
+      translateText(histToTrans, selectedLang.code),
+      translateText(reasonToTrans, selectedLang.code),
+      translateText(detailsToTrans, selectedLang.code),
+      translateText(foodToTrans, selectedLang.code),
+      translateText(clothesToTrans, selectedLang.code),
+      translateText(folkToTrans, selectedLang.code),
+      translateText(langToTrans, selectedLang.code)
+    ]).then(([d, h, r, dt, fd, cl, fk, ln]) => {
+      if (isMounted) {
+        setTranslatedDesc(d);
+        setTranslatedHistory(h);
+        setTranslatedReason(r);
+        setTranslatedDetails(dt);
+        setTranslatedFood(fd);
+        setTranslatedClothes(cl);
+        setTranslatedFolk(fk);
+        setTranslatedLangName(ln);
+      }
+    }).catch(err => {
+      console.warn('Translation error:', err);
+    }).finally(() => {
+      if (isMounted) setIsTranslating(false);
+    });
+
+    return () => { isMounted = false; };
+  }, [selectedLang, currentTradition]);
+
+  // Derive attribute names
   const foodName = currentTradition.traditionalFood || `${currentTradition.state || 'Indian'} Traditional Culinary Feast`;
   const clothesName = currentTradition.traditionalClothes || `${currentTradition.state || 'Indian'} Traditional Heritage Attire`;
   const folkName = currentTradition.folkArts || `${currentTradition.name} Folk & Performing Art`;
   const langName = currentTradition.language || `${currentTradition.state || 'Regional'} Native Dialect`;
 
-  // Visual Image helper based on keyword matching
+  // Display texts (translated or English fallback)
+  const displayDescription = translatedDesc || currentTradition.description;
+  const displayHistory = translatedHistory || currentTradition.historyOrigin || `${currentTradition.name} originated as an integral living expression in ${currentTradition.state}, holding centuries of intergenerational wisdom passed down orally through master practitioners.`;
+  const displayReason = translatedReason || currentTradition.reasonBehindIt || `Functions as a cohesive cultural pillar for local communities in ${currentTradition.state}, fostering ritual bonding, seasonal celebration, and identity preservation.`;
+  const displayDetails = translatedDetails || currentTradition.fullDetails || `Practiced using traditional handloom weaving, specialized tools, indigenous dialects, and authentic regional garments of ${currentTradition.state}.`;
+  const displayFoodName = translatedFood || foodName;
+  const displayClothesName = translatedClothes || clothesName;
+  const displayFolkName = translatedFolk || folkName;
+  const displayLangName = translatedLangName || langName;
+
+
+  // Visual Image helper based on state & keyword matching
   const getFoodImage = () => {
     const fn = foodName.toLowerCase();
-    if (fn.includes('puran') || fn.includes('modak')) return 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=600&q=80';
-    if (fn.includes('makki') || fn.includes('saag')) return 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=600&q=80';
-    if (fn.includes('dhokla') || fn.includes('thali')) return 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=600&q=80';
-    if (fn.includes('sadya') || fn.includes('appam')) return 'https://images.unsplash.com/photo-1610192244261-3f33de3f55e4?auto=format&fit=crop&w=600&q=80';
-    return 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=600&q=80';
+    const st = (currentTradition.state || '').toLowerCase();
+
+    if (st.includes('gujarat') || fn.includes('dhokla') || fn.includes('undhiyu') || fn.includes('fafda') || fn.includes('thali')) {
+      return '/images/gujarat_thali.jpg';
+    }
+    if (st.includes('maharashtra') || fn.includes('puran') || fn.includes('modak') || fn.includes('misal')) {
+      return '/images/puranpoli_modak.jpg';
+    }
+    if (st.includes('punjab') || fn.includes('makki') || fn.includes('saag')) {
+      return '/images/punjab_makki_saag.jpg';
+    }
+    if (st.includes('kerala') || fn.includes('sadya') || fn.includes('appam')) {
+      return '/images/kerala_sadya.jpg';
+    }
+    if (st.includes('assam') || fn.includes('khar') || fn.includes('pitha')) {
+      return '/images/assam_khaar_pitha.jpg';
+    }
+    if (st.includes('madhya') || fn.includes('bafla') || fn.includes('poha')) {
+      return '/images/mp_dal_bafla.jpg';
+    }
+    if (st.includes('uttar') || fn.includes('paan') || fn.includes('malaiyo')) {
+      return '/images/up_dum_pukht_malaiyo.jpg';
+    }
+    if (st.includes('himachal') || fn.includes('dham') || fn.includes('siddu')) {
+      return '/images/hp_dham_siddu.jpg';
+    }
+    if (st.includes('delhi')) {
+      return '/images/delhi_mughlai_chaat.jpg';
+    }
+    return 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=600&q=80';
   };
 
   const getClothesImage = () => {
     const cn = clothesName.toLowerCase();
-    if (cn.includes('kullu') || cn.includes('shawl') || cn.includes('kinnauri') || cn.includes('pahari') || cn.includes('pattu') || cn.includes('rezta') || cn.includes('chola') || cn.includes('himachal')) return '/images/kullu_shawls.jpg';
-    if (cn.includes('nauvari') || cn.includes('paithani')) return 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&q=80';
-    if (cn.includes('phulkari') || cn.includes('patiala')) return 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=600&q=80';
-    if (cn.includes('garba') || cn.includes('chaniya')) return 'https://images.unsplash.com/photo-1567157577867-05ccb1388e66?auto=format&fit=crop&w=600&q=80';
-    if (cn.includes('kasavu') || cn.includes('mundu')) return 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=600&q=80';
+    const st = (currentTradition.state || '').toLowerCase();
+
+    if (st.includes('gujarat') || cn.includes('garba') || cn.includes('chaniya') || cn.includes('kediyu') || cn.includes('bandhani')) {
+      return 'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=600&q=80';
+    }
+    if (st.includes('himachal') || cn.includes('kullu') || cn.includes('shawl') || cn.includes('kinnauri') || cn.includes('pahari') || cn.includes('pattu')) {
+      return '/images/kullu_shawls.jpg';
+    }
+    if (st.includes('maharashtra') || cn.includes('nauvari') || cn.includes('paithani') || cn.includes('pheta')) {
+      return '/images/maharashtra_paithani_saree.jpg';
+    }
+    if (st.includes('punjab') || cn.includes('phulkari') || cn.includes('patiala')) {
+      return '/images/punjab_men_attire.jpg';
+    }
+    if (st.includes('kerala') || cn.includes('kasavu') || cn.includes('mundu')) {
+      return '/images/kasavu_saree.jpg';
+    }
+    if (st.includes('assam') || cn.includes('muga') || cn.includes('mekhela') || cn.includes('gamosa')) {
+      return '/images/muga_silk.jpg';
+    }
+    if (st.includes('madhya') || cn.includes('chanderi') || cn.includes('maheshwari')) {
+      return '/images/chanderi_maheshwari.jpg';
+    }
+    if (st.includes('uttar') || cn.includes('chikankari') || cn.includes('banarasi')) {
+      return '/images/up_banarasi_chikankari_saree.jpg';
+    }
+    if (st.includes('delhi')) {
+      return '/images/delhi_women_salwar_kameez.jpg';
+    }
     return 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&q=80';
   };
 
   const getFolkImage = () => {
     const fn = folkName.toLowerCase();
-    if (fn.includes('powada') || fn.includes('lavani') || fn.includes('warli')) return '/images/warli.jpg';
-    if (fn.includes('bhangra') || fn.includes('giddha')) return 'https://images.unsplash.com/photo-1605649487212-47bdab064df7?auto=format&fit=crop&w=600&q=80';
-    if (fn.includes('kathakali') || fn.includes('theyyam')) return 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=600&q=80';
+    const st = (currentTradition.state || '').toLowerCase();
+
+    if (st.includes('gujarat') || fn.includes('garba') || fn.includes('bhavai') || fn.includes('dayro')) {
+      return '/images/gujarat_garba.jpg';
+    }
+    if (st.includes('maharashtra') || fn.includes('powada') || fn.includes('lavani') || fn.includes('warli') || fn.includes('koli')) {
+      return '/images/powada.jpg';
+    }
+    if (st.includes('punjab') || fn.includes('bhangra') || fn.includes('giddha') || fn.includes('gatka')) {
+      return '/images/punjab_bhangra.jpg';
+    }
+    if (st.includes('kerala') || fn.includes('kathakali') || fn.includes('koodiyattam') || fn.includes('pooram')) {
+      return '/images/kerala_kathakali.jpg';
+    }
+    if (st.includes('assam') || fn.includes('bihu') || fn.includes('sattriya')) {
+      return '/images/assam_bihu.jpg';
+    }
+    if (st.includes('madhya') || fn.includes('bhagoria') || fn.includes('matki') || fn.includes('gond')) {
+      return '/images/mp_bhagoria_haat.jpg';
+    }
+    if (st.includes('uttar') || fn.includes('kathak') || fn.includes('dev deepawali') || fn.includes('holi')) {
+      return '/images/up_dev_deepawali.jpg';
+    }
+    if (st.includes('himachal') || fn.includes('nati') || fn.includes('rumal')) {
+      return '/images/hp_nati_dance.jpg';
+    }
+    if (st.includes('delhi')) {
+      return '/images/delhi_kathak.jpg';
+    }
     return '/images/dhangari.jpg';
   };
 
@@ -172,39 +360,86 @@ export default function TraditionDetailView({
           </div>
         </div>
 
-        {/* Right Radial Score Card */}
-        <div className="lg:col-span-5 blueprint-card p-6 flex flex-col justify-center items-center text-center">
-          <div className="text-xs font-bold text-stone-700 mb-4">
-            Heritage Transmission Health Score
-          </div>
+        {/* Right Radial Score Card & 2026 Gemini AI Survival Engine */}
+        <div className="lg:col-span-5 blueprint-card p-6 flex flex-col justify-between items-center text-center space-y-4">
+          <div>
+            <div className="text-xs font-bold text-stone-700 mb-3 flex items-center justify-center gap-1.5">
+              <Activity className="w-4 h-4 text-emerald-700" />
+              <span>Heritage Transmission Health Score</span>
+            </div>
 
-          {/* Radial Gauge */}
-          <div className="relative w-32 h-32 rounded-full radial-gauge-critical flex items-center justify-center shadow-inner">
-            <div className="w-24 h-24 rounded-full bg-white flex flex-col items-center justify-center shadow-xs">
-              <span className="text-3xl font-black text-stone-900 leading-none">
-                {currentTradition.score}
+            {/* Radial Gauge */}
+            <div className={`relative w-28 h-28 mx-auto rounded-full flex items-center justify-center shadow-inner ${
+              isCritical ? 'radial-gauge-critical' : isVulnerable ? 'radial-gauge-vulnerable' : 'radial-gauge-strong'
+            }`}>
+              <div className="w-20 h-20 rounded-full bg-white flex flex-col items-center justify-center shadow-xs">
+                <span className={`text-2xl font-black leading-none ${
+                  isCritical ? 'text-red-700' : isVulnerable ? 'text-amber-700' : 'text-emerald-700'
+                }`}>
+                  {displayScore}
+                </span>
+                <span className="text-[9px] text-stone-400 font-semibold mt-0.5">
+                  / 100
+                </span>
+              </div>
+            </div>
+
+            {/* Status Badge */}
+            <div className="mt-3">
+              <span className={`text-xs font-bold px-3 py-1 rounded-full ${
+                isCritical
+                  ? 'bg-red-50 text-red-700 border border-red-200'
+                  : isVulnerable
+                  ? 'bg-orange-50 text-orange-700 border border-orange-200'
+                  : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+              }`}>
+                {displayStatusLabel}
               </span>
-              <span className="text-[10px] text-stone-400 font-semibold mt-0.5">
-                / 100
-              </span>
+            </div>
+
+            <div className="text-[11px] text-stone-500 mt-1.5 font-medium">
+              {currentTradition.statusDetail || "Transmission at Risk"}
             </div>
           </div>
 
-          {/* Status Badge */}
-          <div className="mt-4">
-            <span className={`text-xs font-bold px-3 py-1 rounded-full ${
-              isCritical
-                ? 'bg-red-50 text-red-700 border border-red-200'
-                : isVulnerable
-                ? 'bg-orange-50 text-orange-700 border border-orange-200'
-                : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-            }`}>
-              {currentTradition.statusLabel}
-            </span>
-          </div>
+          {/* 🤖 2026 Gemini AI Survival % Box */}
+          <div className="w-full bg-gradient-to-br from-amber-50 to-purple-50 p-3.5 rounded-xl border border-amber-200/80 text-left space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-purple-900 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-purple-700 animate-pulse" />
+                <span>2026 Gemini AI Survival Prediction</span>
+              </span>
+              <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-purple-700 text-white shadow-2xs">
+                YEAR 2026
+              </span>
+            </div>
 
-          <div className="text-xs text-stone-500 mt-2 font-medium">
-            {currentTradition.statusDetail || "Transmission at Risk"}
+            {loadingSurvival ? (
+              <div className="py-3 text-center text-xs text-stone-500 animate-pulse font-semibold">
+                🤖 Querying Gemini AI Key for 2026 Survival Vitality %...
+              </div>
+            ) : survivalData ? (
+              <div className="space-y-1.5 text-xs">
+                <div className="flex items-center justify-between bg-white/80 p-2 rounded-lg border border-purple-100">
+                  <span className="text-stone-600 font-medium">Living Vitality (2026):</span>
+                  <span className={`font-black text-sm ${
+                    survivalData.survivalPercentage2026 >= 70 ? 'text-emerald-700' :
+                    survivalData.survivalPercentage2026 >= 50 ? 'text-amber-700' : 'text-red-700'
+                  }`}>
+                    {survivalData.survivalPercentage2026}% ALIVE
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-[11px] text-stone-600 px-1">
+                  <span>Decay Velocity: <strong className="text-stone-900">{survivalData.decayVelocity}</strong></span>
+                  <span>Est. Masters: <strong className="text-stone-900">{survivalData.estimatedSurvivingPractitioners2026}</strong></span>
+                </div>
+                {survivalData.aiSummary2026 && (
+                  <p className="text-[11px] text-stone-700 italic leading-snug pt-1 border-t border-purple-100/80">
+                    "{survivalData.aiSummary2026}"
+                  </p>
+                )}
+              </div>
+            ) : null}
           </div>
         </div>
 
@@ -238,8 +473,8 @@ export default function TraditionDetailView({
               </div>
             </div>
             <div>
-              <div className="text-[11px] font-bold text-amber-950 line-clamp-1">{foodName}</div>
-              <p className="text-[10px] text-amber-800/80 mt-0.5">Authentic recipe & traditional food of {currentTradition.state}</p>
+              <div className="text-[11px] font-bold text-amber-950 line-clamp-1">{displayFoodName}</div>
+              <p className="text-[10px] text-amber-800/80 mt-0.5">Authentic recipe &amp; traditional food of {currentTradition.state}</p>
             </div>
           </div>
 
@@ -257,8 +492,8 @@ export default function TraditionDetailView({
               </div>
             </div>
             <div>
-              <div className="text-[11px] font-bold text-indigo-950 line-clamp-1">{clothesName}</div>
-              <p className="text-[10px] text-indigo-800/80 mt-0.5">Handwoven traditional apparel & ornaments of {currentTradition.state}</p>
+              <div className="text-[11px] font-bold text-indigo-950 line-clamp-1">{displayClothesName}</div>
+              <p className="text-[10px] text-indigo-800/80 mt-0.5">Handwoven traditional apparel &amp; ornaments of {currentTradition.state}</p>
             </div>
           </div>
 
@@ -272,12 +507,12 @@ export default function TraditionDetailView({
               />
               <div className="absolute top-2 left-2 bg-purple-900/80 text-purple-100 backdrop-blur-xs text-[10px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
                 <Music className="w-3 h-3" />
-                <span>Folk & Performing Arts</span>
+                <span>Folk &amp; Performing Arts</span>
               </div>
             </div>
             <div>
-              <div className="text-[11px] font-bold text-purple-950 line-clamp-1">{folkName}</div>
-              <p className="text-[10px] text-purple-800/80 mt-0.5">Living oral & musical performance arts of {currentTradition.state}</p>
+              <div className="text-[11px] font-bold text-purple-950 line-clamp-1">{displayFolkName}</div>
+              <p className="text-[10px] text-purple-800/80 mt-0.5">Living oral &amp; musical performance arts of {currentTradition.state}</p>
             </div>
           </div>
 
@@ -286,12 +521,12 @@ export default function TraditionDetailView({
             <div className="relative h-28 w-full rounded-xl overflow-hidden bg-emerald-900/10 flex items-center justify-center p-3 text-center">
               <div className="space-y-1">
                 <Languages className="w-6 h-6 text-emerald-800 mx-auto" />
-                <div className="text-xs font-black text-emerald-950">{langName}</div>
+                <div className="text-xs font-black text-emerald-950">{displayLangName}</div>
                 <div className="text-[9px] font-semibold text-emerald-700 uppercase tracking-wider">Indigenous Dialect</div>
               </div>
             </div>
             <div>
-              <div className="text-[11px] font-bold text-emerald-950 line-clamp-1">{langName}</div>
+              <div className="text-[11px] font-bold text-emerald-950 line-clamp-1">{displayLangName}</div>
               <p className="text-[10px] text-emerald-800/80 mt-0.5">Linguistic medium of heritage transmission in {currentTradition.state}</p>
             </div>
           </div>
@@ -301,35 +536,58 @@ export default function TraditionDetailView({
 
       {/* Gemini AI Detailed Cultural Significance Section */}
       <div className="blueprint-card p-6 bg-gradient-to-br from-stone-900 via-stone-850 to-stone-900 text-stone-100 space-y-4">
-        <div className="flex items-center justify-between border-b border-stone-800 pb-3">
-          <h3 className="text-sm font-bold text-amber-300 flex items-center gap-2">
-            <BookOpen className="w-4 h-4 text-amber-400" />
-            <span>Detailed Cultural Significance & Historical Roots (Google Gemini AI Analysis)</span>
-          </h3>
-          <span className="text-[10px] font-bold bg-amber-400/20 text-amber-300 px-2.5 py-0.5 rounded-full border border-amber-400/30">
-            Verified Heritage Significance
-          </span>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 border-b border-stone-800 pb-3">
+          <div className="flex items-center justify-between flex-1 gap-2">
+            <h3 className="text-sm font-bold text-amber-300 flex items-center gap-2">
+              <BookOpen className="w-4 h-4 text-amber-400" />
+              <span>Detailed Cultural Significance &amp; Historical Roots (Google Gemini AI Analysis)</span>
+            </h3>
+            <span className="text-[10px] font-bold bg-amber-400/20 text-amber-300 px-2.5 py-0.5 rounded-full border border-amber-400/30 whitespace-nowrap">
+              Verified Heritage Significance
+            </span>
+          </div>
+          {/* 🎙️ VoiceBot — Cultural Significance Dossier */}
+          <div style={{ filter: 'invert(1) hue-rotate(180deg)', opacity: 0.92 }}>
+            <VoiceBot
+              textToRead={[displayHistory, displayReason, displayDetails].join(' ')}
+              tradition={currentTradition}
+              selectedLang={selectedLang}
+              onLanguageChange={setSelectedLang}
+            />
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-stone-300">
           <div className="bg-stone-800/60 p-4 rounded-xl border border-stone-700/60 space-y-1.5">
-            <h4 className="font-bold text-amber-300 text-xs">🏛️ Historical Origin & How It Started</h4>
+            <h4 className="font-bold text-amber-300 text-xs">🏛️ Historical Origin &amp; How It Started</h4>
             <p className="text-[11px] text-stone-300 leading-relaxed">
-              {currentTradition.historyOrigin || `${currentTradition.name} originated as an integral living expression in ${currentTradition.state}, holding centuries of intergenerational wisdom passed down orally through master practitioners.`}
+              {isTranslating ? (
+                <span className="animate-pulse text-amber-200/70">Translating origin details...</span>
+              ) : (
+                displayHistory
+              )}
             </p>
           </div>
 
           <div className="bg-stone-800/60 p-4 rounded-xl border border-stone-700/60 space-y-1.5">
-            <h4 className="font-bold text-emerald-300 text-xs">🌾 Cultural Purpose & Reason Behind It</h4>
+            <h4 className="font-bold text-emerald-300 text-xs">🌾 Cultural Purpose &amp; Reason Behind It</h4>
             <p className="text-[11px] text-stone-300 leading-relaxed">
-              {currentTradition.reasonBehindIt || `Functions as a cohesive cultural pillar for local communities in ${currentTradition.state}, fostering ritual bonding, seasonal celebration, and identity preservation.`}
+              {isTranslating ? (
+                <span className="animate-pulse text-emerald-200/70">Translating cultural purpose...</span>
+              ) : (
+                displayReason
+              )}
             </p>
           </div>
 
           <div className="bg-stone-800/60 p-4 rounded-xl border border-stone-700/60 space-y-1.5">
-            <h4 className="font-bold text-purple-300 text-xs">✨ Craftsmanship & Performance Method</h4>
+            <h4 className="font-bold text-purple-300 text-xs">✨ Craftsmanship &amp; Performance Method</h4>
             <p className="text-[11px] text-stone-300 leading-relaxed">
-              {currentTradition.fullDetails || `Practiced using traditional handloom weaving, specialized tools, indigenous dialects, and authentic regional garments of ${currentTradition.state}.`}
+              {isTranslating ? (
+                <span className="animate-pulse text-purple-200/70">Translating craftsmanship...</span>
+              ) : (
+                displayDetails
+              )}
             </p>
           </div>
         </div>
@@ -341,21 +599,48 @@ export default function TraditionDetailView({
         {/* Left Column: About + 5 Key Indicators */}
         <div className="lg:col-span-7 space-y-6">
           <div className="blueprint-card p-6 space-y-4">
-            <h3 className="text-sm font-bold text-stone-900 flex items-center gap-2">
-              <BookOpen className="w-4 h-4 text-emerald-800" />
-              <span>Full Description & Detailed Heritage Dossier</span>
-            </h3>
-            <div className="text-xs sm:text-sm text-stone-700 leading-relaxed space-y-3 font-sans border-l-3 border-amber-500 pl-4 py-2 bg-amber-50/20 rounded-r-xl">
-              {typeof currentTradition.description === 'string' && currentTradition.description.includes('\n') ? (
-                currentTradition.description.split(/\n\s*\n/).map((para, idx) => (
-                  <p key={idx} className="leading-relaxed text-stone-800 font-normal">
-                    {para.trim()}
-                  </p>
-                ))
-              ) : (
-                <p className="leading-relaxed text-stone-800 font-normal">{currentTradition.description}</p>
-              )}
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-bold text-stone-900 flex items-center gap-2">
+                  <BookOpen className="w-4 h-4 text-emerald-800" />
+                  <span>Full Description &amp; Detailed Heritage Dossier</span>
+                </h3>
+                {selectedLang.code !== 'en-IN' && (
+                  <span className="text-[10px] font-bold text-purple-700 bg-purple-50 px-2.5 py-0.5 rounded-full border border-purple-200 flex items-center gap-1">
+                    <Globe className="w-3 h-3" />
+                    <span>{selectedLang.flag} {selectedLang.label}</span>
+                  </span>
+                )}
+              </div>
+
+              {/* 🎙️ VoiceBot — Full Description */}
+              <VoiceBot
+                textToRead={displayDescription}
+                tradition={currentTradition}
+                selectedLang={selectedLang}
+                onLanguageChange={setSelectedLang}
+              />
             </div>
+
+            {isTranslating ? (
+              <div className="py-4 px-4 bg-purple-50/50 rounded-xl border border-purple-100 flex items-center gap-2 text-xs font-semibold text-purple-800 animate-pulse">
+                <Loader2 className="w-4 h-4 animate-spin text-purple-600" />
+                <span>Translating Full Description into {selectedLang.label}…</span>
+              </div>
+            ) : (
+              <div className="text-xs sm:text-sm text-stone-700 leading-relaxed space-y-3 font-sans border-l-3 border-amber-500 pl-4 py-2 bg-amber-50/20 rounded-r-xl">
+                {typeof displayDescription === 'string' && displayDescription.includes('\n') ? (
+                  displayDescription.split(/\n\s*\n/).map((para, idx) => (
+                    <p key={idx} className="leading-relaxed text-stone-800 font-normal">
+                      {para.trim()}
+                    </p>
+                  ))
+                ) : (
+                  <p className="leading-relaxed text-stone-800 font-normal">{displayDescription}</p>
+                )}
+              </div>
+            )}
+
 
             {/* Key Indicators Header */}
             <div className="pt-4 border-t border-stone-100">

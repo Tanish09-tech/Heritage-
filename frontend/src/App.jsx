@@ -13,6 +13,7 @@ import AddTraditionView from './components/AddTraditionView';
 import PractitionerDashboardView from './components/PractitionerDashboardView';
 import LearnerDashboardView from './components/LearnerDashboardView';
 import MasterMatchingView from './components/MasterMatchingView';
+import GuruShishyaDetailsView from './components/GuruShishyaDetailsView';
 import AiAnalysisView from './components/AiAnalysisView';
 import KnowledgeVaultView from './components/KnowledgeVaultView';
 import ValidationQueueView from './components/ValidationQueueView';
@@ -57,7 +58,12 @@ export default function App() {
       if (savedUserStr) {
         const savedUser = JSON.parse(savedUserStr);
         if (savedUser) {
-          if (savedView && savedView !== 'LANDING' && savedView !== 'LOGIN') return savedView;
+          if (savedView && savedView !== 'LANDING' && savedView !== 'LOGIN') {
+            if (savedView === 'AI_ANALYSIS' && savedRole !== 'AUTHORITY' && savedUser.role !== 'AUTHORITY') {
+              return savedRole === 'LEARNER' || savedUser.role === 'LEARNER' ? 'LEARNER_DASHBOARD' : 'PRACTITIONER_DASHBOARD';
+            }
+            return savedView;
+          }
           if (savedRole === 'LEARNER' || savedUser.role === 'LEARNER') return 'LEARNER_DASHBOARD';
           if (savedRole === 'PRACTITIONER' || savedUser.role === 'PRACTITIONER') return 'PRACTITIONER_DASHBOARD';
           return 'DASHBOARD';
@@ -403,6 +409,7 @@ export default function App() {
               <HeritageMapView
                 traditions={traditions}
                 onSelectTradition={handleSelectTradition}
+                onBack={() => handleNavigateView(currentRole === 'LEARNER' ? 'LEARNER_DASHBOARD' : currentRole === 'PRACTITIONER' ? 'PRACTITIONER_DASHBOARD' : 'DASHBOARD')}
               />
             )}
 
@@ -454,13 +461,22 @@ export default function App() {
               <MasterMatchingView
                 onSelectTradition={handleSelectTradition}
                 traditions={traditions}
+                onBack={() => handleNavigateView(currentRole === 'LEARNER' ? 'LEARNER_DASHBOARD' : currentRole === 'PRACTITIONER' ? 'PRACTITIONER_DASHBOARD' : 'DASHBOARD')}
               />
             )}
 
-            {/* Screen 12: AI Heritage Analysis (Admin Only) */}
-            {activeView === 'AI_ANALYSIS' && currentRole === 'AUTHORITY' && (
+            {/* Screen: Guru & Shishya Details (Admin Only) */}
+            {activeView === 'GURU_SHISHYA_DETAILS' && (
+              <GuruShishyaDetailsView 
+                onBack={() => handleNavigateView('DASHBOARD')} 
+              />
+            )}
+
+            {/* Screen 12: AI Heritage Analysis */}
+            {activeView === 'AI_ANALYSIS' && (
               <AiAnalysisView
                 traditions={traditions}
+                onBack={() => handleNavigateView(currentRole === 'LEARNER' ? 'LEARNER_DASHBOARD' : currentRole === 'PRACTITIONER' ? 'PRACTITIONER_DASHBOARD' : 'DASHBOARD')}
                 onUpdateTraditionScore={() => {}}
               />
             )}
@@ -468,6 +484,7 @@ export default function App() {
             {/* Supporting View: Documentation Vault */}
             {activeView === 'DOCUMENTATION' && (
               <KnowledgeVaultView
+                onBack={() => handleNavigateView(currentRole === 'LEARNER' ? 'LEARNER_DASHBOARD' : currentRole === 'PRACTITIONER' ? 'PRACTITIONER_DASHBOARD' : 'DASHBOARD')}
                 archivedItems={archivedItems}
                 onAddArchivedItem={async (item) => {
                   try {
@@ -477,6 +494,12 @@ export default function App() {
                     setArchivedItems(prev => [item, ...prev]);
                   }
                 }}
+                onDeleteArchivedItem={async (itemId) => {
+                  try {
+                    await api.deleteVaultItem(itemId);
+                  } catch (e) {}
+                  setArchivedItems(prev => prev.filter(i => i.id !== itemId));
+                }}
                 currentUser={currentUser}
               />
             )}
@@ -484,6 +507,7 @@ export default function App() {
             {/* Supporting View: Validation Queue */}
             {activeView === 'VALIDATION' && (
               <ValidationQueueView
+                onBack={() => handleNavigateView('DASHBOARD')}
                 queue={queue}
                 onApproveItem={async (id) => {
                   try {
@@ -501,6 +525,7 @@ export default function App() {
               <MasterMatchingView
                 onSelectTradition={handleSelectTradition}
                 traditions={traditions}
+                onBack={() => handleNavigateView('DASHBOARD')}
                 currentUser={currentUser}
               />
             )}

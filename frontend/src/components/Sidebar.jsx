@@ -21,18 +21,19 @@ export default function Sidebar({ activeView, setActiveView, onLogout, currentRo
 
   // Dynamic Role-based navigation items filtering
   const getMenuItems = () => {
-    // 1. Shishya (Learner) Role: NO Admin Dashboard, NO Guru Portal, NO Validation Queue
+    // 1. Shishya (Learner) Role
     if (currentRole === 'LEARNER') {
       return [
         { id: 'LEARNER_DASHBOARD', label: t('shishyaPortal'), icon: GraduationCap },
         { id: 'MATCHING', label: t('matchmaker'), icon: Users },
         { id: 'MAP', label: t('map'), icon: MapPin },
         { id: 'EXPLORER', label: t('explorer'), icon: BookOpen },
+        { id: 'DOCUMENTATION', label: t('knowledgeVault'), icon: FileText },
         { id: 'SETTINGS', label: t('settings'), icon: Settings },
       ];
     }
 
-    // 2. Guru (Practitioner) Role: NO Admin Dashboard, NO Shishya Portal, NO Validation Queue
+    // 2. Guru (Practitioner) Role
     if (currentRole === 'PRACTITIONER') {
       return [
         { id: 'PRACTITIONER_DASHBOARD', label: t('guruPortal'), icon: Users },
@@ -43,15 +44,14 @@ export default function Sidebar({ activeView, setActiveView, onLogout, currentRo
       ];
     }
 
-    // 3. Admin (Authority) Role: NO Guru Portal, NO Shishya Portal
+    // 3. Admin (Authority) Role
     return [
       { id: 'DASHBOARD', label: t('adminPortal'), icon: LayoutDashboard },
-      { id: 'MATCHING', label: t('matchmaker'), icon: Users },
+      { id: 'GURU_SHISHYA_DETAILS', label: t('guruShishyaDetails'), icon: Users },
       { id: 'MAP', label: t('map'), icon: MapPin },
       { id: 'EXPLORER', label: t('explorer'), icon: BookOpen },
-      { id: 'AI_ANALYSIS', label: t('aiInsights'), icon: Activity },
       { id: 'DOCUMENTATION', label: t('knowledgeVault'), icon: FileText },
-      { id: 'VALIDATION', label: t('validationQueue'), icon: ShieldCheck },
+      { id: 'AI_ANALYSIS', label: t('aiInsights'), icon: Activity },
       { id: 'SETTINGS', label: t('settings'), icon: Settings },
     ];
   };

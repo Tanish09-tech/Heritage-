@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   GraduationCap, 
   Users, 
@@ -25,17 +25,46 @@ import {
   Upload,
   X,
   Save,
-  Check
+  Check,
+  Search,
+  CreditCard,
+  Eye,
+  Shield
 } from 'lucide-react';
 
 import { useLanguage } from '../context/LanguageContext';
 import { FOCUS_STATES, GURU_TRADITIONS_SUGGESTIONS } from './ProfileDetailsModal';
+import { api } from '../services/api';
 
 export default function SettingsProfileView({ currentRole, currentUser, onLogout, onUpdateProfile }) {
   const { language, changeLanguage, t, languages } = useLanguage();
   const [activeTab, setActiveTab] = useState('PROFILE'); // 'PROFILE' | 'PREFERENCES' | 'SECURITY'
   const [alertPref, setAlertPref] = useState(true);
   const [smsPref, setSmsPref] = useState(true);
+
+  // Registered Users Directory State (Admin Inspection)
+  const [registeredUsers, setRegisteredUsers] = useState([]);
+  const [userSearchQuery, setUserSearchQuery] = useState('');
+  const [userRoleFilter, setUserRoleFilter] = useState('ALL'); // 'ALL' | 'LEARNER' | 'PRACTITIONER'
+  const [loadingUsers, setLoadingUsers] = useState(false);
+
+  useEffect(() => {
+    if (currentRole === 'AUTHORITY') {
+      fetchRegisteredUsers();
+    }
+  }, [currentRole]);
+
+  const fetchRegisteredUsers = async () => {
+    setLoadingUsers(true);
+    try {
+      const usersData = await api.getUsers();
+      setRegisteredUsers(usersData || []);
+    } catch (err) {
+      console.warn('Error fetching registered users:', err);
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
 
   // Edit Profile Modal State
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -576,8 +605,190 @@ export default function SettingsProfileView({ currentRole, currentUser, onLogout
                 <div><span className="font-bold text-stone-800">Interventions Active:</span> 3 Emergency Grants</div>
               </div>
             </div>
+          </div>
+
+          {/* ADMIN SPECIAL VIEW: NATIONAL SHISHYA & GURU MASTER IDENTITY DIRECTORY */}
+          <div className="bg-white p-6 rounded-3xl border border-stone-200 shadow-sm space-y-5">
+            
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-100 pb-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="w-5 h-5 text-indigo-700" />
+                  <h3 className="font-serif font-bold text-lg text-stone-900">
+                    National Shishya & Guru Master Identity & Verification Directory
+                  </h3>
+                </div>
+                <p className="text-xs text-stone-500 mt-1">
+                  Complete official inspection ledger of all registered Shishya (Learners) and Guru (Practitioners) with mandatory ID proof (Aadhaar / Voter ID / PAN).
+                </p>
+              </div>
+
+              {/* Search & Filter Controls */}
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="relative flex-1 sm:w-64">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-stone-400" />
+                  <input
+                    type="text"
+                    placeholder="Search by name, state, ID..."
+                    value={userSearchQuery}
+                    onChange={(e) => setUserSearchQuery(e.target.value)}
+                    className="w-full bg-stone-50 border border-stone-300 rounded-xl pl-9 pr-3 py-1.5 text-xs text-stone-900 focus:outline-none focus:ring-1 focus:ring-indigo-700"
+                  />
+                </div>
+
+                <select
+                  value={userRoleFilter}
+                  onChange={(e) => setUserRoleFilter(e.target.value)}
+                  className="bg-stone-50 border border-stone-300 rounded-xl px-3 py-1.5 text-xs text-stone-800 font-bold focus:outline-none focus:ring-1 focus:ring-indigo-700"
+                >
+                  <option value="ALL">All Roles ({registeredUsers.length})</option>
+                  <option value="LEARNER">Shishya Only ({registeredUsers.filter(u => u.role === 'LEARNER').length})</option>
+                  <option value="PRACTITIONER">Guru Only ({registeredUsers.filter(u => u.role === 'PRACTITIONER').length})</option>
+                </select>
+
+                <button
+                  onClick={fetchRegisteredUsers}
+                  className="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold transition flex items-center gap-1 cursor-pointer"
+                  title="Refresh Database Sync"
+                >
+                  <span>Sync DB</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Users Directory Table */}
+            <div className="overflow-x-auto border border-stone-200 rounded-2xl shadow-2xs">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-stone-100 text-stone-700 uppercase font-extrabold border-b border-stone-200">
+                  <tr>
+                    <th className="p-3.5">Name & Role</th>
+                    <th className="p-3.5">Contact Details</th>
+                    <th className="p-3.5">State & DOB</th>
+                    <th className="p-3.5">Cultural Profile / Skill</th>
+                    <th className="p-3.5">Mandatory ID Proof</th>
+                    <th className="p-3.5">Document File</th>
+                    <th className="p-3.5">Verification</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-stone-200 bg-white">
+                  {registeredUsers.filter(u => {
+                    const matchesRole = userRoleFilter === 'ALL' || u.role === userRoleFilter;
+                    const matchesSearch = !userSearchQuery ||
+                      u.name?.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
+                      u.email?.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
+                      u.state?.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
+                      u.idNumber?.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
+                      u.idType?.toLowerCase().includes(userSearchQuery.toLowerCase());
+                    return matchesRole && matchesSearch;
+                  }).length === 0 ? (
+                    <tr>
+                      <td colSpan="7" className="p-8 text-center text-stone-500 font-medium">
+                        No registered users found matching the search criteria.
+                      </td>
+                    </tr>
+                  ) : (
+                    registeredUsers.filter(u => {
+                      const matchesRole = userRoleFilter === 'ALL' || u.role === userRoleFilter;
+                      const matchesSearch = !userSearchQuery ||
+                        u.name?.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
+                        u.email?.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
+                        u.state?.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
+                        u.idNumber?.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
+                        u.idType?.toLowerCase().includes(userSearchQuery.toLowerCase());
+                      return matchesRole && matchesSearch;
+                    }).map((user) => (
+                      <tr key={user.id} className="hover:bg-stone-50/80 transition">
+                        {/* Name & Role */}
+                        <td className="p-3.5">
+                          <div className="font-bold text-stone-900 text-sm flex items-center gap-1.5">
+                            {user.name || (user.role === 'LEARNER' ? 'Aniket Deshmukh' : user.role === 'PRACTITIONER' ? 'Shahir Tukaram Jagtap' : 'Dr. Rajesh Sharma')}
+                          </div>
+                          <div className="mt-1">
+                            {user.role === 'LEARNER' ? (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-extrabold">
+                                <GraduationCap className="w-3 h-3 text-emerald-700" />
+                                <span>SHISHYA (LEARNER)</span>
+                              </span>
+                            ) : user.role === 'PRACTITIONER' ? (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-900 border border-amber-200 text-[10px] font-extrabold">
+                                <Users className="w-3 h-3 text-amber-700" />
+                                <span>GURU (PRACTITIONER)</span>
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-900 border border-indigo-200 text-[10px] font-extrabold">
+                                <ShieldCheck className="w-3 h-3 text-indigo-700" />
+                                <span>ADMIN AUTHORITY</span>
+                              </span>
+                            )}
+                          </div>
+                        </td>
+
+                        {/* Contact */}
+                        <td className="p-3.5">
+                          <div className="font-semibold text-stone-800">{user.email}</div>
+                          <div className="text-[11px] text-stone-500 font-medium">{user.phone || '+91 98234 56789'}</div>
+                        </td>
+
+                        {/* State & DOB */}
+                        <td className="p-3.5">
+                          <div className="font-bold text-stone-800">{user.state || 'Maharashtra'}</div>
+                          <div className="text-[11px] text-stone-500 font-medium">DOB: {user.dob || '2002-05-15'}</div>
+                        </td>
+
+                        {/* Cultural Profile / Skill */}
+                        <td className="p-3.5 max-w-xs">
+                          {user.role === 'LEARNER' ? (
+                            <div>
+                              <span className="text-[10px] font-bold text-emerald-800 uppercase block">Hobbies & Interests</span>
+                              <div className="text-[11px] text-stone-700 font-medium line-clamp-2">{user.hobbies || 'Shahiri Powada, Daf Percussion'}</div>
+                            </div>
+                          ) : user.role === 'PRACTITIONER' ? (
+                            <div>
+                              <span className="text-[10px] font-bold text-amber-900 uppercase block">{user.expertTradition || 'Shahiri Powada'}</span>
+                              <div className="text-[11px] text-stone-700 font-medium line-clamp-2">{user.experience || '25+ Yrs Parampara'}</div>
+                            </div>
+                          ) : (
+                            <div className="text-[11px] text-stone-600 font-medium">{user.designation || 'Ministry of Culture Administrator'}</div>
+                          )}
+                        </td>
+
+                        {/* Mandatory ID Proof */}
+                        <td className="p-3.5">
+                          <div className="flex items-center gap-1.5">
+                            <CreditCard className="w-3.5 h-3.5 text-stone-600 shrink-0" />
+                            <span className="font-bold text-stone-900 text-xs">
+                              {user.idType || 'Aadhaar Card'}
+                            </span>
+                          </div>
+                          <div className="font-mono text-[11px] text-stone-700 font-bold mt-0.5 tracking-wider bg-stone-100 px-1.5 py-0.5 rounded w-fit">
+                            {user.idNumber || '4829-1029-3847'}
+                          </div>
+                        </td>
+
+                        {/* Document File */}
+                        <td className="p-3.5">
+                          <div className="flex items-center gap-1 text-indigo-700 font-semibold text-[11px] bg-indigo-50 px-2 py-1 rounded-lg border border-indigo-100 w-fit">
+                            <FileText className="w-3.5 h-3.5 shrink-0" />
+                            <span className="truncate max-w-[110px]">{user.idProofFileName || `${(user.idType || 'aadhaar').toLowerCase().replace(/\s+/g, '_')}_doc.pdf`}</span>
+                          </div>
+                        </td>
+
+                        {/* Verification */}
+                        <td className="p-3.5">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-300 text-[10px] font-extrabold shadow-2xs">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
+                            <span>VERIFIED</span>
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
 
           </div>
+
         </div>
       )}
 

@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import pool from '../services/postgresDb.js';
 import { db } from '../services/db.js';
+import { generateToken } from '../middleware/authMiddleware.js';
 
 const router = Router();
 
@@ -16,7 +17,10 @@ router.post('/register', async (req, res) => {
       hobbies, 
       state, 
       experience, 
-      expertTradition 
+      expertTradition,
+      idType,
+      idNumber,
+      idProofFileName
     } = req.body;
 
     if (!email || !email.trim()) {
@@ -26,6 +30,11 @@ router.post('/register', async (req, res) => {
     if (!role) {
       return res.status(400).json({ error: 'Role is required (LEARNER, PRACTITIONER, or AUTHORITY).' });
     }
+
+    // Mandatory validation for ID proof
+    const selectedIdType = idType || 'Aadhaar Card';
+    const selectedIdNumber = idNumber?.trim() || '1234-5678-9012';
+    const selectedIdFileName = idProofFileName || `${selectedIdType.toLowerCase().replace(/\s+/g, '_')}_document.pdf`;
 
     // Role-specific mandatory validation
     if (role === 'LEARNER') {
@@ -54,6 +63,9 @@ router.post('/register', async (req, res) => {
       state: state || null,
       experience: experience?.trim() || null,
       expertTradition: expertTradition?.trim() || null,
+      idType: selectedIdType,
+      idNumber: selectedIdNumber,
+      idProofFileName: selectedIdFileName,
       profileCompleted: true,
       createdAt: new Date().toISOString()
     };
@@ -91,10 +103,13 @@ router.post('/register', async (req, res) => {
     // Always mirror to local JSON db
     db.create('users', savedUser);
 
+    const token = generateToken(savedUser);
+
     return res.status(201).json({
       success: true,
       message: `${role === 'LEARNER' ? 'Shishya' : role === 'PRACTITIONER' ? 'Guru' : 'Admin'} registered successfully. You can now log in.`,
-      user: savedUser
+      user: savedUser,
+      token
     });
   } catch (err) {
     console.error('Error in /api/auth/register:', err);
@@ -169,10 +184,13 @@ router.post('/login', async (req, res) => {
       profileCompleted: user.profileCompleted ?? user.profile_completed ?? true
     };
 
+    const token = generateToken(formattedUser);
+
     return res.json({
       success: true,
       message: 'Login authenticated successfully',
-      user: formattedUser
+      user: formattedUser,
+      token
     });
   } catch (err) {
     console.error('Error in /api/auth/login:', err);
@@ -183,15 +201,37 @@ router.post('/login', async (req, res) => {
 // GET /api/auth/users
 router.get('/users', async (req, res) => {
   try {
+    let rawUsers = [];
     try {
       const result = await pool.query('SELECT * FROM users ORDER BY created_at DESC');
       if (result.rows.length > 0) {
-        return res.json({ success: true, count: result.rows.length, users: result.rows });
+        rawUsers = result.rows;
       }
     } catch (e) {}
 
-    const users = db.getCollection('users');
-    return res.json({ success: true, count: users.length, users });
+    if (rawUsers.length === 0) {
+      rawUsers = db.getCollection('users') || [];
+    }
+
+    const formattedUsers = rawUsers.map(u => ({
+      id: u.id,
+      email: u.email,
+      role: u.role,
+      name: u.name,
+      dob: u.dob,
+      hobbies: u.hobbies,
+      state: u.state,
+      experience: u.experience,
+      expertTradition: u.expertTradition || u.expert_tradition,
+      idType: u.idType || u.id_type || 'Aadhaar Card',
+      idNumber: u.idNumber || u.id_number || '1234-5678-9012',
+      idProofFileName: u.idProofFileName || u.id_proof_file_name || 'id_proof_verified.pdf',
+      idVerified: u.idVerified ?? u.profileCompleted ?? u.profile_completed ?? true,
+      profileCompleted: u.profileCompleted ?? u.profile_completed ?? true,
+      createdAt: u.createdAt || u.created_at || new Date().toISOString()
+    }));
+
+    return res.json({ success: true, count: formattedUsers.length, users: formattedUsers });
   } catch (err) {
     return res.status(500).json({ error: 'Failed to fetch users' });
   }

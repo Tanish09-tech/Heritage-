@@ -3,6 +3,7 @@ import {
   MapPin, 
   Layers, 
   ChevronRight, 
+  ChevronLeft,
   Compass, 
   Sparkles,
   Eye,
@@ -104,7 +105,7 @@ export function matchStateObject(stateName) {
   return partialMatch || null;
 }
 
-export default function HeritageMapView({ traditions, onSelectTradition }) {
+export default function HeritageMapView({ traditions, onSelectTradition, onBack }) {
   const [selectedZone, setSelectedZone] = useState('ALL');
   const [selectedState, setSelectedState] = useState('Maharashtra');
   const [selectedPinId, setSelectedPinId] = useState('powada-01');
@@ -216,6 +217,15 @@ export default function HeritageMapView({ traditions, onSelectTradition }) {
         
         {/* Left Header Title */}
         <div className="flex items-center gap-3">
+          {onBack && (
+            <button 
+              onClick={onBack}
+              className="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer border border-stone-200"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              <span>Back</span>
+            </button>
+          )}
           <div className="w-11 h-11 rounded-xl bg-[#2e3e55] flex items-center justify-center text-amber-300 font-bold shadow-xs">
             <Compass className="w-6 h-6 animate-spin-slow" />
           </div>

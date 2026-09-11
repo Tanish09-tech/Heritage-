@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { CheckCircle2, XCircle, Check, ShieldCheck, UserCheck } from 'lucide-react';
+import { CheckCircle2, XCircle, Check, ShieldCheck, UserCheck, ChevronLeft } from 'lucide-react';
 
-export default function ValidationQueueView({ queue, onApproveItem }) {
+export default function ValidationQueueView({ onBack, queue, onApproveItem }) {
   const [queueItems, setQueueItems] = useState(queue);
 
   const handleApprove = (id) => {
@@ -20,16 +20,27 @@ export default function ValidationQueueView({ queue, onApproveItem }) {
       
       {/* Header */}
       <div className="clean-card p-6 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="w-5 h-5 text-[#0f2a4a]" />
-            <h2 className="font-cinzel text-xl md:text-2xl font-bold text-[#0f2a4a]">
-              Community Data Validation Queue
-            </h2>
+        <div className="flex items-center gap-3">
+          {onBack && (
+            <button 
+              onClick={onBack}
+              className="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer border border-stone-200"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              <span>Back</span>
+            </button>
+          )}
+          <div>
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-5 h-5 text-[#0f2a4a]" />
+              <h2 className="font-cinzel text-xl md:text-2xl font-bold text-[#0f2a4a]">
+                Community Data Validation Queue
+              </h2>
+            </div>
+            <p className="text-xs text-slate-600 mt-1">
+              Human-in-the-Loop Governance: Peer verification of indicator submissions before score integration
+            </p>
           </div>
-          <p className="text-xs text-slate-600 mt-1">
-            Human-in-the-Loop Governance: Peer verification of indicator submissions before score integration
-          </p>
         </div>
 
         <div className="flex items-center gap-2 bg-purple-50 px-3.5 py-1.5 rounded-xl border border-purple-200 text-xs text-purple-900 font-bold">

@@ -338,7 +338,7 @@ export const PILOT_TRADITIONS = [
     "state": "Maharashtra",
     "community": "Maharashtra Community & Dhol Tasha Pathaks",
     "language": "Marathi",
-    "score": 88,
+    "score": 90,
     "status": "STRONG",
     "statusLabel": "Strong",
     "statusDetail": "Vibrant Community Celebration",

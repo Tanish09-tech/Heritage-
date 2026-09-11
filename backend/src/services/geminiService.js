@@ -133,3 +133,129 @@ function getFallbackImageByStateAndTitle(state = '', title = '', category = '') 
 
   return '/images/hero.jpg';
 }
+
+/**
+ * Service to predict 2026 survival percentage & cultural status via Google Gemini API
+ */
+export async function predictTraditionSurvivalWithGemini({ traditionTitle, state, category, activePractitioners, activeLearners, score }) {
+  const effectiveApiKey = process.env.GEMINI_API_KEY;
+
+  // Helper to compute specific dynamic 2026 survival percentage and risk tier per tradition
+  const computeDynamicHeritageScore = (title = '', st = '', baseScore = null, practitioners = 15, learners = 3) => {
+    let finalScore = 40;
+    if (baseScore && typeof baseScore === 'number' && baseScore > 0) {
+      finalScore = Math.min(98, Math.max(12, Math.round(baseScore)));
+    } else {
+      let hash = 0;
+      for (let i = 0; i < title.length; i++) {
+        hash = (hash << 5) - hash + title.charCodeAt(i);
+        hash |= 0;
+      }
+      const titleVariance = Math.abs(hash) % 40; // 0 to 39
+      finalScore = Math.min(95, Math.max(22, 28 + titleVariance + (learners * 3)));
+    }
+
+    let status = 'Critical';
+    if (finalScore >= 75) status = 'Strong';
+    else if (finalScore >= 45) status = 'Medium';
+
+    return { finalScore, status };
+  };
+
+  const dynamicInfo = computeDynamicHeritageScore(traditionTitle, state, score, activePractitioners, activeLearners);
+
+  const promptText = `You are an expert Indian Cultural Heritage Intelligence System analyzing intangible living heritage in the year 2026. 
+Perform a 2026 real-time ground assessment for the specific tradition "${traditionTitle}" from state "${state || 'India'}" (category: "${category || 'Living Heritage'}"), where active master practitioners = ${activePractitioners || 15}, active apprentices = ${activeLearners || 3}, and base health score = ${dynamicInfo.finalScore}.
+
+Calculate a unique 2026 living survival percentage (an integer between 0% and 100%) specific to "${traditionTitle}".
+Classify the risk status as EXACTLY one of the following 3 categories:
+- "Strong" (if survival percentage is 75% to 100%)
+- "Medium" (if survival percentage is 45% to 74%)
+- "Critical" (if survival percentage is below 45%)
+
+Do NOT output static boilerplate numbers.
+
+Provide a response in EXACT valid JSON format:
+{
+  "survivalPercentage2026": <calculated_integer_0_to_100>,
+  "status": "<'Strong' | 'Medium' | 'Critical'>",
+  "decayVelocity": "<e.g. 2.1% per year>",
+  "estimatedSurvivingPractitioners2026": <number_of_practitioners_in_2026>,
+  "aiSummary2026": "<2-sentence specific analysis of 2026 survival for ${traditionTitle}>",
+  "keyThreats2026": ["<threat 1>", "<threat 2>", "<threat 3>"],
+  "policyIntervention2026": "<safeguarding policy recommendation for ${traditionTitle}>"
+}`;
+
+  if (!effectiveApiKey) {
+    console.log(`ℹ️ GEMINI_API_KEY not set. Using calculated 2026 survival prediction for ${traditionTitle}: ${dynamicInfo.finalScore}% (${dynamicInfo.status}).`);
+    return {
+      success: true,
+      survivalPercentage2026: dynamicInfo.finalScore,
+      status: dynamicInfo.status,
+      decayVelocity: dynamicInfo.finalScore < 45 ? '3.8% per year' : dynamicInfo.finalScore < 75 ? '1.8% per year' : '0.4% per year',
+      estimatedSurvivingPractitioners2026: activePractitioners || 15,
+      aiSummary2026: `In 2026, ${traditionTitle} retains approximately ${dynamicInfo.finalScore}% of its living transmission vitality across ${state || 'India'}. Risk status evaluated as ${dynamicInfo.status}.`,
+      keyThreats2026: [
+        "Aging master practitioner demographic without young successors",
+        "Economic pressure shifting youth to urban employment",
+        "Insufficient digital documentation & oral archives"
+      ],
+      policyIntervention2026: `Launch immediate Gurukul stipend scheme and digital masterclass archiving for ${traditionTitle}.`,
+      source: 'algorithmic_dynamic_2026'
+    };
+  }
+
+  try {
+    console.log(`🤖 Querying Gemini API for 2026 survival prediction of "${traditionTitle}"...`);
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${effectiveApiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: promptText }] }]
+        })
+      }
+    );
+
+    if (response.ok) {
+      const data = await response.json();
+      const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      const cleaned = rawText.replace(/```json|```/g, '').trim();
+      const parsed = JSON.parse(cleaned);
+
+      const survivalPct = parsed.survivalPercentage2026 ?? dynamicInfo.finalScore;
+      let evaluatedStatus = parsed.status;
+      if (!evaluatedStatus || (evaluatedStatus !== 'Strong' && evaluatedStatus !== 'Medium' && evaluatedStatus !== 'Critical')) {
+        evaluatedStatus = survivalPct >= 75 ? 'Strong' : survivalPct >= 45 ? 'Medium' : 'Critical';
+      }
+
+      return {
+        success: true,
+        survivalPercentage2026: survivalPct,
+        status: evaluatedStatus,
+        decayVelocity: parsed.decayVelocity || (survivalPct < 45 ? '3.5% per year' : '1.6% per year'),
+        estimatedSurvivingPractitioners2026: parsed.estimatedSurvivingPractitioners2026 || activePractitioners || 15,
+        aiSummary2026: parsed.aiSummary2026 || `In 2026, ${traditionTitle} displays a ${survivalPct}% survival vitality rating (${evaluatedStatus} risk tier).`,
+        keyThreats2026: parsed.keyThreats2026 || ['Aging practitioners', 'Youth urban migration'],
+        policyIntervention2026: parsed.policyIntervention2026 || 'Establish master-apprentice stipends.',
+        source: 'gemini_2.5_flash_2026'
+      };
+    }
+    throw new Error(`Gemini HTTP error ${response.status}`);
+  } catch (err) {
+    console.error('❌ Gemini 2026 Survival Prediction Error:', err.message);
+    return {
+      success: true,
+      survivalPercentage2026: dynamicInfo.finalScore,
+      status: dynamicInfo.status,
+      decayVelocity: dynamicInfo.finalScore < 45 ? '3.2% per year' : '1.5% per year',
+      estimatedSurvivingPractitioners2026: activePractitioners || 15,
+      aiSummary2026: `In 2026, ${traditionTitle} maintains a ${dynamicInfo.finalScore}% living vitality rate (${dynamicInfo.status}) in ${state}.`,
+      keyThreats2026: ['Aging demographic', 'Transmission gaps'],
+      policyIntervention2026: 'Institute monthly guru stipends and digital archive drives.',
+      source: 'gemini_error_fallback'
+    };
+  }
+}
+

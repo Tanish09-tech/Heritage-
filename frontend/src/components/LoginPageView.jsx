@@ -646,41 +646,7 @@ export default function LoginPageView({ onLoginSuccess, onBackToLanding }) {
                       : `Continue to Mandatory ${roleData[selectedRole].title} Details →`}
                 </button>
 
-                {/* 'or login with' Divider */}
-                <div className="relative flex items-center justify-center my-3 pt-1">
-                  <div className="border-t border-stone-200 w-full" />
-                  <span className="bg-white px-3 text-[11px] text-stone-400 lowercase font-medium">
-                    or login with
-                  </span>
-                </div>
 
-                {/* Circular Social Login Buttons */}
-                <div className="flex items-center justify-center gap-4 pt-0.5">
-                  <button
-                    type="button"
-                    onClick={() => handleSocialLogin('Google')}
-                    className="w-9 h-9 rounded-full border border-stone-200 flex items-center justify-center hover:bg-stone-50 transition shadow-2xs font-bold text-xs text-red-600 cursor-pointer"
-                    title="Login with Google"
-                  >
-                    G
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleSocialLogin('Apple')}
-                    className="w-9 h-9 rounded-full border border-stone-200 flex items-center justify-center hover:bg-stone-50 transition shadow-2xs font-bold text-xs text-stone-800 cursor-pointer"
-                    title="Login with Apple"
-                  >
-                    
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleSocialLogin('DigiLocker')}
-                    className="w-9 h-9 rounded-full border border-stone-200 flex items-center justify-center hover:bg-stone-50 transition shadow-2xs font-bold text-[10px] text-blue-600 cursor-pointer"
-                    title="Login with DigiLocker"
-                  >
-                    DL
-                  </button>
-                </div>
 
               </form>
 

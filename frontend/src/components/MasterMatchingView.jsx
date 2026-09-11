@@ -8,6 +8,7 @@ import {
   Sparkles, 
   MessageSquare, 
   ChevronRight,
+  ChevronLeft,
   Send,
   Clock,
   Lock,
@@ -22,7 +23,7 @@ import { MASTER_PRACTITIONERS } from '../data/heritageData';
 import { api } from '../services/api';
 import ChatModal from './ChatModal';
 
-export default function MasterMatchingView({ onSelectTradition, traditions, currentUser }) {
+export default function MasterMatchingView({ onSelectTradition, traditions, currentUser, onBack }) {
   const [activeSubTab, setActiveSubTab] = useState('FIND_MASTERS'); // 'FIND_MASTERS' or 'MY_CONNECTIONS'
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStateFilter, setSelectedStateFilter] = useState('ALL');
@@ -117,16 +118,27 @@ export default function MasterMatchingView({ onSelectTradition, traditions, curr
       
       {/* Title & Sub-tabs */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold font-sans text-stone-900 flex items-center gap-2">
-            <span>Guru-Shishya Matchmaker System</span>
-            <span className="text-xs font-semibold bg-emerald-100 text-emerald-900 border border-emerald-300 px-2.5 py-0.5 rounded-full">
-              Real-Time Mentorship
-            </span>
-          </h1>
-          <p className="text-xs text-stone-500 mt-1">
-            Connect directly with verified master practitioners across India's living heritage traditions
-          </p>
+        <div className="flex items-center gap-3">
+          {onBack && (
+            <button 
+              onClick={onBack}
+              className="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer border border-stone-200"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              <span>Back</span>
+            </button>
+          )}
+          <div>
+            <h1 className="text-2xl font-bold font-sans text-stone-900 flex items-center gap-2">
+              <span>Guru-Shishya Matchmaker System</span>
+              <span className="text-xs font-semibold bg-emerald-100 text-emerald-900 border border-emerald-300 px-2.5 py-0.5 rounded-full">
+                Real-Time Mentorship
+              </span>
+            </h1>
+            <p className="text-xs text-stone-500 mt-1">
+              Connect directly with verified master practitioners across India's living heritage traditions
+            </p>
+          </div>
         </div>
 
         {/* Sub-tabs */}

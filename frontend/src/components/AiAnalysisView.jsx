@@ -6,10 +6,11 @@ import {
   AlertTriangle, 
   ShieldCheck, 
   Sliders,
-  CheckCircle2 
+  CheckCircle2,
+  ChevronLeft
 } from 'lucide-react';
 
-export default function AiAnalysisView({ onUpdateTraditionScore, traditions }) {
+export default function AiAnalysisView({ onBack, onUpdateTraditionScore, traditions }) {
   const [practitioners, setPractitioners] = useState(18);
   const [learners, setLearners] = useState(3);
   const [trainingFrequency, setTrainingFrequency] = useState('Monthly');
@@ -99,13 +100,24 @@ export default function AiAnalysisView({ onUpdateTraditionScore, traditions }) {
       
       {/* View Title */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold font-sans text-stone-900">
-            AI Heritage Analysis
-          </h1>
-          <p className="text-xs text-stone-500 mt-0.5">
-            Living Heritage Transmission Risk Predictor
-          </p>
+        <div className="flex items-center gap-3">
+          {onBack && (
+            <button 
+              onClick={onBack}
+              className="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer border border-stone-200"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              <span>Back</span>
+            </button>
+          )}
+          <div>
+            <h1 className="text-2xl font-bold font-sans text-stone-900">
+              AI Heritage Analysis
+            </h1>
+            <p className="text-xs text-stone-500 mt-0.5">
+              Living Heritage Transmission Risk Predictor
+            </p>
+          </div>
         </div>
       </div>
 

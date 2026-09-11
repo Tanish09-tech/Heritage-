@@ -15,11 +15,20 @@ import {
   Search,
   BookOpen,
   VolumeX,
-  Languages
+  Languages,
+  ChevronLeft,
+  Plus,
+  X,
+  Upload,
+  Trash2
 } from 'lucide-react';
 import { retrieveKnowledgeChunk, KNOWLEDGE_CHUNKS } from '../services/knowledgeChunks';
 
-export default function KnowledgeVaultView({ archivedItems = [], onAddArchivedItem, currentUser }) {
+export default function KnowledgeVaultView({ archivedItems = [], onAddArchivedItem, onDeleteArchivedItem, currentUser, onBack }) {
+  // Role check: Only Gurus (PRACTITIONER / AUTHORITY) can save/deposit oral composition data
+  const isPractitioner = currentUser?.role === 'PRACTITIONER' || currentUser?.role === 'AUTHORITY' || !currentUser?.role;
+  const isLearner = currentUser?.role === 'LEARNER';
+
   // Speech Recognition States
   const [isListening, setIsListening] = useState(false);
   const [spokenQuery, setSpokenQuery] = useState('');
@@ -32,7 +41,17 @@ export default function KnowledgeVaultView({ archivedItems = [], onAddArchivedIt
   
   // Pan-India Archive Playing State
   const [playingId, setPlayingId] = useState(null);
-  const [selectedConsent, setSelectedConsent] = useState('Public Educational Access');
+
+  // Guru Deposit New Composition Modal State
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newTitle, setNewTitle] = useState('');
+  const [newTradition, setNewTradition] = useState('Shahiri Powada');
+  const [newPractitioner, setNewPractitioner] = useState(currentUser?.name || 'Guru Shahir Tukaram');
+  const [newState, setNewState] = useState('Maharashtra');
+  const [newLanguage, setNewLanguage] = useState('Marathi');
+  const [newTranscript, setNewTranscript] = useState('');
+  const [newTranslation, setNewTranslation] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const timerRef = useRef(null);
   const recognitionRef = useRef(null);
@@ -181,7 +200,7 @@ export default function KnowledgeVaultView({ archivedItems = [], onAddArchivedIt
       language: selectedLang.toUpperCase(),
       duration: `${listeningTime > 0 ? listeningTime : 8} secs`,
       date: new Date().toISOString().split('T')[0],
-      tags: [retrievedChunk.state, "AI Retrieved", "Voice Archive", "data.md"],
+      tags: [retrievedChunk.state, "AI Retrieved", "Voice Archive", "Oral Heritage"],
       consent: selectedConsent,
       transcriptExcerpt: spokenQuery || "Voice Inquiry from User",
       englishTranslation: answerText
@@ -193,6 +212,38 @@ export default function KnowledgeVaultView({ archivedItems = [], onAddArchivedIt
 
     setRetrievedChunk(null);
     setSpokenQuery('');
+  };
+
+  // Guru Deposit New Living Oral Composition Submit Handler
+  const handleAddCompositionSubmit = async (e) => {
+    e.preventDefault();
+    if (!newTitle.trim() || isSubmitting) return;
+
+    setIsSubmitting(true);
+    const newItem = {
+      id: `kn-${Date.now()}`,
+      title: newTitle.trim(),
+      tradition: newTradition.trim(),
+      practitioner: newPractitioner.trim() || (currentUser?.name || 'Guru Master'),
+      type: "Guru Deposited Oral Composition",
+      language: newLanguage.trim(),
+      duration: "14 mins 10 secs",
+      date: new Date().toISOString().split('T')[0],
+      tags: [newState.trim(), "Guru Composition", "Oral Archive"],
+      transcriptExcerpt: newTranscript.trim() || "Oral composition and verse recorded by Guru.",
+      englishTranslation: newTranslation.trim() || newTranscript.trim() || "English translation of oral verses."
+    };
+
+    if (onAddArchivedItem) {
+      onAddArchivedItem(newItem);
+    }
+
+    setShowAddModal(false);
+    setNewTitle('');
+    setNewTranscript('');
+    setNewTranslation('');
+    setIsSubmitting(false);
+    alert(`Successfully deposited "${newItem.title}" into the Pan-India Living Oral Archive!`);
   };
 
   // Play audio transcript from archive list
@@ -224,6 +275,15 @@ export default function KnowledgeVaultView({ archivedItems = [], onAddArchivedIt
       {/* Top Banner */}
       <div className="bg-white p-6 rounded-3xl border border-stone-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-3">
+          {onBack && (
+            <button 
+              onClick={onBack}
+              className="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer border border-stone-200"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              <span>Back</span>
+            </button>
+          )}
           <div className="p-3 rounded-2xl bg-amber-50 text-amber-800 border border-amber-200 shadow-2xs">
             <Bot className="w-6 h-6 text-[#104333]" />
           </div>
@@ -232,7 +292,7 @@ export default function KnowledgeVaultView({ archivedItems = [], onAddArchivedIt
               AI Voice Knowledge Assistant & Documentation Vault
             </h2>
             <p className="text-xs text-stone-500 mt-0.5 font-medium">
-              Listen User Voice • Chunking & Retrieval from `data.md` • Multilingual Speaking Bot
+              Listen User Voice • AI Knowledge Retrieval • Multilingual Speaking Bot
             </p>
           </div>
         </div>
@@ -335,7 +395,7 @@ export default function KnowledgeVaultView({ archivedItems = [], onAddArchivedIt
             {/* Sample Voice Question Chips */}
             <div className="pt-3 border-t border-stone-100 text-left space-y-2">
               <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block">
-                Or Select Sample Voice Questions (`data.md` Chunks):
+                Or Select Sample Voice Questions:
               </span>
               <div className="flex flex-wrap gap-1.5">
                 {[
@@ -410,27 +470,18 @@ export default function KnowledgeVaultView({ archivedItems = [], onAddArchivedIt
                 </div>
               </div>
 
-              {/* Consent Selection & Save */}
-              <div className="space-y-2 pt-1">
-                <label className="text-xs text-stone-800 font-bold block">Knowledge Access Consent:</label>
-                <select
-                  value={selectedConsent}
-                  onChange={(e) => setSelectedConsent(e.target.value)}
-                  className="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-xs text-stone-900 font-semibold focus:outline-hidden cursor-pointer"
-                >
-                  <option value="Public Educational Access">Public Educational Access</option>
-                  <option value="Verified Community Access">Verified Community Access Only</option>
-                  <option value="Apprentice-Only Access">Apprentice-Only Restricted Access</option>
-                </select>
-
-                <button
-                  onClick={handleSaveRecord}
-                  className="w-full py-3 rounded-2xl bg-[#104333] hover:bg-[#0b3327] text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-2 cursor-pointer active:scale-98 mt-2"
-                >
-                  <CheckCircle2 className="w-4 h-4 text-amber-300" />
-                  <span>Save Record to Searchable Archive</span>
-                </button>
-              </div>
+              {/* Save Button - ONLY VISIBLE TO GURU / PRACTITIONER / ADMIN */}
+              {isPractitioner && (
+                <div className="pt-1">
+                  <button
+                    onClick={handleSaveRecord}
+                    className="w-full py-3 rounded-2xl bg-[#104333] hover:bg-[#0b3327] text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+                  >
+                    <CheckCircle2 className="w-4 h-4 text-amber-300" />
+                    <span>Save Record to Searchable Archive</span>
+                  </button>
+                </div>
+              )}
 
             </div>
           )}
@@ -445,7 +496,17 @@ export default function KnowledgeVaultView({ archivedItems = [], onAddArchivedIt
               <BookOpen className="w-4 h-4 text-[#104333]" />
               <span>Archived Living Oral Compositions ({archivedItems.length})</span>
             </span>
-            <span className="text-[10px] text-stone-400 font-semibold">Pan-India Archive (`data.md`)</span>
+            {isPractitioner ? (
+              <button
+                onClick={() => setShowAddModal(true)}
+                className="px-3.5 py-2 rounded-xl bg-[#104333] hover:bg-[#0b3327] text-white font-bold text-xs flex items-center gap-1.5 transition shadow-sm cursor-pointer capitalize"
+              >
+                <Plus className="w-4 h-4 text-amber-300" />
+                <span>+ Archived Living Oral Compositions</span>
+              </button>
+            ) : (
+              <span className="text-[10px] text-stone-400 font-semibold">Pan-India Archive</span>
+            )}
           </div>
 
           <div className="space-y-4">
@@ -470,17 +531,33 @@ export default function KnowledgeVaultView({ archivedItems = [], onAddArchivedIt
                       </div>
                     </div>
 
-                    <button
-                      onClick={() => handlePlayArchiveAudio(item)}
-                      className={`flex items-center justify-center w-11 h-11 rounded-2xl border transition-all cursor-pointer shrink-0 ${
-                        isCurrentlyPlaying 
-                          ? 'bg-amber-600 text-white border-amber-600 shadow-md animate-pulse' 
-                          : 'bg-amber-50 hover:bg-amber-100 border-amber-200 text-amber-900'
-                      }`}
-                      title={isCurrentlyPlaying ? "Pause Audio" : "Play Audio Transcript"}
-                    >
-                      {isCurrentlyPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5 text-[#104333]" />}
-                    </button>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        onClick={() => handlePlayArchiveAudio(item)}
+                        className={`flex items-center justify-center w-10 h-10 rounded-2xl border transition-all cursor-pointer ${
+                          isCurrentlyPlaying 
+                            ? 'bg-amber-600 text-white border-amber-600 shadow-md animate-pulse' 
+                            : 'bg-amber-50 hover:bg-amber-100 border-amber-200 text-amber-900'
+                        }`}
+                        title={isCurrentlyPlaying ? "Pause Audio" : "Play Audio Transcript"}
+                      >
+                        {isCurrentlyPlaying ? <Pause className="w-4.5 h-4.5" /> : <Play className="w-4.5 h-4.5 ml-0.5 text-[#104333]" />}
+                      </button>
+
+                      {isPractitioner && onDeleteArchivedItem && (
+                        <button
+                          onClick={() => {
+                            if (window.confirm(`Are you sure you want to delete "${item.title}" from the living oral archive?`)) {
+                              onDeleteArchivedItem(item.id);
+                            }
+                          }}
+                          className="flex items-center justify-center w-10 h-10 rounded-2xl border border-red-200 bg-red-50 hover:bg-red-100 text-red-700 transition-all cursor-pointer"
+                          title="Delete Oral Composition"
+                        >
+                          <Trash2 className="w-4.5 h-4.5" />
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   <div className="bg-stone-50 p-3.5 rounded-2xl border border-stone-200 text-xs space-y-1">
@@ -494,7 +571,7 @@ export default function KnowledgeVaultView({ archivedItems = [], onAddArchivedIt
 
                   <div className="flex flex-wrap items-center justify-between gap-2 pt-1.5 border-t border-stone-100 text-xs font-medium">
                     <div className="flex flex-wrap items-center gap-1.5">
-                      {item.tags?.map((t, idx) => (
+                      {item.tags?.filter(t => t !== 'data.md').map((t, idx) => (
                         <span key={idx} className="flex items-center gap-1 text-stone-700 bg-stone-100 px-2.5 py-1 rounded-xl border border-stone-200 text-[11px] font-semibold">
                           <Tag className="w-3 h-3 text-[#104333]" />
                           {t}
@@ -502,10 +579,6 @@ export default function KnowledgeVaultView({ archivedItems = [], onAddArchivedIt
                       ))}
                     </div>
 
-                    <span className="text-emerald-800 font-bold flex items-center gap-1 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200 text-[11px]">
-                      <Globe className="w-3.5 h-3.5 text-emerald-600" />
-                      {item.consent}
-                    </span>
                   </div>
 
                 </div>
@@ -516,6 +589,131 @@ export default function KnowledgeVaultView({ archivedItems = [], onAddArchivedIt
         </div>
 
       </div>
+
+      {/* Guru Deposit New Oral Composition Modal */}
+      {showAddModal && isPractitioner && (
+        <div className="fixed inset-0 bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-stone-200 space-y-4 relative">
+            <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-xl bg-amber-50 text-amber-900 border border-amber-200">
+                  <Plus className="w-5 h-5 text-[#104333]" />
+                </div>
+                <div>
+                  <h3 className="font-cinzel text-lg font-bold text-stone-900">Archived Living Oral Compositions</h3>
+                  <p className="text-xs text-stone-500 font-medium">Deposit new master oral composition into the Pan-India Archive</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="p-1.5 rounded-xl hover:bg-stone-100 text-stone-400 hover:text-stone-700 transition cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddCompositionSubmit} className="space-y-3">
+              <div>
+                <label className="block text-xs font-bold text-stone-700 mb-1">Composition Title *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Chhatrapati Shivaji Maharaj Ballad - Agindas Verse"
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 text-xs font-medium focus:ring-2 focus:ring-[#104333] outline-hidden"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-stone-700 mb-1">Tradition Name</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Shahiri Powada"
+                    value={newTradition}
+                    onChange={(e) => setNewTradition(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 text-xs font-medium focus:ring-2 focus:ring-[#104333] outline-hidden"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-stone-700 mb-1">Master Practitioner</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Guru Shahir Tukaram"
+                    value={newPractitioner}
+                    onChange={(e) => setNewPractitioner(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 text-xs font-medium focus:ring-2 focus:ring-[#104333] outline-hidden"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-stone-700 mb-1">State / Region</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Maharashtra"
+                    value={newState}
+                    onChange={(e) => setNewState(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 text-xs font-medium focus:ring-2 focus:ring-[#104333] outline-hidden"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-stone-700 mb-1">Language</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Marathi"
+                    value={newLanguage}
+                    onChange={(e) => setNewLanguage(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 text-xs font-medium focus:ring-2 focus:ring-[#104333] outline-hidden"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-stone-700 mb-1">Oral Transcript / Verses</label>
+                <textarea
+                  rows="2"
+                  placeholder="Enter the native oral verses or composition lyric excerpt..."
+                  value={newTranscript}
+                  onChange={(e) => setNewTranscript(e.target.value)}
+                  className="w-full px-3.5 py-2 rounded-xl border border-stone-300 text-xs font-serif italic focus:ring-2 focus:ring-[#104333] outline-hidden"
+                ></textarea>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-stone-700 mb-1">English Translation & Explanation</label>
+                <textarea
+                  rows="2"
+                  placeholder="Enter the English translation and heritage context..."
+                  value={newTranslation}
+                  onChange={(e) => setNewTranslation(e.target.value)}
+                  className="w-full px-3.5 py-2 rounded-xl border border-stone-300 text-xs font-medium focus:ring-2 focus:ring-[#104333] outline-hidden"
+                ></textarea>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-stone-100">
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(false)}
+                  className="px-4 py-2 rounded-xl border border-stone-300 text-stone-600 hover:bg-stone-50 font-bold text-xs transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="px-5 py-2 rounded-xl bg-[#104333] hover:bg-[#0b3327] text-white font-bold text-xs transition shadow-md flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                >
+                  <Upload className="w-4 h-4 text-amber-300" />
+                  <span>{isSubmitting ? 'Archiving...' : 'Deposit to Archive'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
     </div>
   );

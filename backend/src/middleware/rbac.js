@@ -11,8 +11,8 @@
 export function requireRole(allowedRoles = []) {
   return (req, res, next) => {
     try {
-      // Extract user role from header or body
-      const userRole = req.headers['x-user-role'] || req.headers['role'] || req.body?.userRole || req.query?.userRole || 'GUEST';
+      // Extract user role from JWT req.user, header, or body
+      const userRole = req.user?.role || req.headers['x-user-role'] || req.headers['role'] || req.body?.userRole || req.query?.userRole || 'GUEST';
       
       // AUTHORITY has full administrative access to all routes
       if (userRole === 'AUTHORITY') {

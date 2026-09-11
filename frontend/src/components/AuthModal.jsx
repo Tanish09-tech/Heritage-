@@ -205,33 +205,7 @@ export default function AuthModal({ isOpen, onClose, onSuccessfulAuth }) {
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
 
-          {/* Divider */}
-          <div className="relative flex items-center justify-center my-2">
-            <div className="border-t border-stone-200 w-full" />
-            <span className="bg-white px-2 text-[10px] text-stone-400 uppercase font-medium">
-              or connect with
-            </span>
-          </div>
 
-          {/* Social Logins */}
-          <div className="flex items-center justify-center gap-3">
-            <button
-              type="button"
-              onClick={() => onSuccessfulAuth(roleMap[role].roleKey, roleMap[role].targetView)}
-              className="px-3 py-1.5 rounded-xl border border-stone-200 hover:bg-stone-50 flex items-center gap-1.5 text-xs font-semibold text-stone-700 shadow-2xs transition"
-            >
-              <span className="text-amber-600 font-bold">🏛️</span>
-              <span>MeriPehchaan</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => onSuccessfulAuth(roleMap[role].roleKey, roleMap[role].targetView)}
-              className="px-3 py-1.5 rounded-xl border border-stone-200 hover:bg-stone-50 flex items-center gap-1.5 text-xs font-semibold text-stone-700 shadow-2xs transition"
-            >
-              <span className="text-red-500 font-bold">G</span>
-              <span>Google</span>
-            </button>
-          </div>
         </form>
 
         {/* Bottom Silhouette Ornament Pattern */}
